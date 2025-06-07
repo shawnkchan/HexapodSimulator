@@ -3,6 +3,9 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 class Axes():
+    '''
+    Object representing an x, y, and z unit axis
+    '''
     def __init__(self):
         self.unitCylinder = Cylinder()
     

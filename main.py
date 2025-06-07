@@ -8,10 +8,10 @@ from canvas import Canvas
 def main():
     # Initialize pygame
     pygame.init()
-    display = (800, 600)
+    display = (1000, 600)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     glClearColor(1, 1, 1, 1)
-    gluPerspective(45, display[0]/display[1], 0.1, 50.0)
+    gluPerspective(45, display[0] / display[1], 0.1, 50.0)
     glTranslatef(0.0, 0.0, -5)
 
     # set the initial camera view
@@ -23,7 +23,7 @@ def main():
 
     # instantiate canvas object
     canvas = Canvas()
-    xAngle, yAngle, zAngle = 0, 0, 0
+    xAngle, yAngle, zAngle, zoomVal = 0, 0, 0, 0
 
     # Run an infinite loop to render any new frames
     while running:
@@ -43,9 +43,11 @@ def main():
             xAngle += 1
         if keys[K_DOWN]:
             xAngle -= 1
+        if keys[pygame.K_z]:
+            zoomVal -= 0.1
 
 
-        canvas.drawScene(xAngle, yAngle, zAngle)
+        canvas.drawScene(xAngle, yAngle, zAngle, zoomVal)
 
         pygame.display.flip()
         clock.tick(60)

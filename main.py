@@ -2,66 +2,7 @@ import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import math
-import pygame
-
-class Cylinder():
-    def __init__(self, base=0.1, top=0.1, length=1.0, slices=32):
-        self.base = base
-        self.top = top
-        self.length = length
-        self.slices = slices
-
-    def draw(self):
-        quadric = gluNewQuadric()
-        gluQuadricDrawStyle(quadric, GLU_FILL)
-        gluCylinder(quadric, self.base, self.top, self.length, self.slices, 1)
-
-
-
-class Axes():
-    def __init__(self):
-        self.unitCylinder = Cylinder()
-    
-    def draw(self):
-        glPushMatrix()
-
-        # z axis, red
-        glColor3f(1, 0, 0)
-        self.unitCylinder.draw()
-
-        # x axis, blue
-        glRotatef(90, 0, 1, 0)
-        glColor3f(0, 0, 1)
-        self.unitCylinder.draw()
-    
-        # y axis, green
-        glRotatef(90, 1, 0, 0)
-        glColor3f(0, 1, 0)
-        self.unitCylinder.draw()
-
-        glPopMatrix()
-
-
-class Canvas():
-    '''
-    Representation of a drawing that gets rendered in a canvas
-    '''
-    def __init__(self):
-        self.mainAxes = Axes()
-    
-    def drawScene(self, xAngle, yAngle, zAngle):
-        glPushMatrix()
-
-        # rotate around the scene
-        glRotatef(zAngle, 0, 0, 1)
-        glRotatef(xAngle, 1, 0, 0)
-        glRotatef(yAngle, 0, 1, 0)
-
-        # draw objects here
-        self.mainAxes.draw()
-
-        glPopMatrix()
+from canvas import Canvas
 
 
 def main():

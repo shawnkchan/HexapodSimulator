@@ -11,7 +11,7 @@ class Canvas():
         self.mainAxes = Axes()
         self.hideAxes = False
     
-    def drawScene(self, xAngle, yAngle, zAngle, zoomVal):
+    def drawScene(self, xAngle, yAngle, zAngle, zoomVal, jointAngle):
         glPushMatrix()
 
         # rotate around the scene
@@ -23,11 +23,8 @@ class Canvas():
         # draw objects here
         if not self.hideAxes:
             self.mainAxes.draw()
-        
-        # member = Member(color=glColor3f(0, 0, 0), length=3)
-        # member.draw()
 
-        joint = Joint(angle=45.0)
+        joint = Joint(angle=jointAngle)
         joint.draw()
 
 

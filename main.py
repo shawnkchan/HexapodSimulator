@@ -68,7 +68,7 @@ def main():
 
         # clean the canvas to refresh the frame
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        canvas.drawScene(xAngle, yAngle, zAngle, zoomVal)    
+        canvas.drawScene(xAngle, yAngle, zAngle, zoomVal, angle)    
 
         imgui.render()
         impl.render(imgui.get_draw_data())

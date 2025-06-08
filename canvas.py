@@ -1,7 +1,7 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from utils import Axes
-from parts import Joint
+from parts import Member, Joint
 
 class Canvas():
     '''
@@ -18,13 +18,17 @@ class Canvas():
         glRotatef(zAngle, 0, 0, 1)
         glRotatef(xAngle, 1, 0, 0)
         glRotatef(yAngle, 0, 1, 0)
-        glTranslatef(zoomVal, zoomVal, zoomVal)
+        glTranslatef(zoomVal, -zoomVal, zoomVal)
 
         # draw objects here
         if not self.hideAxes:
             self.mainAxes.draw()
         
-        joint = Joint(color=glColor3f(0, 0, 0), length=32)
+        # member = Member(color=glColor3f(0, 0, 0), length=3)
+        # member.draw()
+
+        joint = Joint(angle=45.0)
         joint.draw()
+
 
         glPopMatrix()

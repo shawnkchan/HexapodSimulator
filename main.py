@@ -32,12 +32,10 @@ def main():
     imgui.create_context()
     impl = PygameRenderer()
     impl.io.display_size = display
-    angle = 0.0
-
 
     # Run an infinite loop to render any new frames
     while running:
-        timeDelta = clock.tick(60) / 1000.0
+        clock.tick(60)
         
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -48,9 +46,6 @@ def main():
         imgui.new_frame()
         imgui.set_next_window_size(300, 200)
         imgui.begin("Control Panel")
-        changed, angle = imgui.slider_float("Rotation", angle, -180.0, 180.0)
-        imgui.end()
-        
 
         keys = pygame.key.get_pressed()
         if keys[K_LEFT]:
@@ -68,8 +63,9 @@ def main():
 
         # clean the canvas to refresh the frame
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        canvas.drawScene(xAngle, yAngle, zAngle, zoomVal, angle)    
+        canvas.drawScene(xAngle, yAngle, zAngle, zoomVal) 
 
+        imgui.end()
         imgui.render()
         impl.render(imgui.get_draw_data())
 

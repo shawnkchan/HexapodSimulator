@@ -12,3 +12,4 @@ class Cylinder():
         quadric = gluNewQuadric()
         gluQuadricDrawStyle(quadric, GLU_FILL)
         gluCylinder(quadric, self.base, self.top, self.length, self.slices, 1)
+        gluDeleteQuadric(quadric)

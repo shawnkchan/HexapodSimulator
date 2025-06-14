@@ -1,17 +1,25 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from utils import Axes
-from parts import Member, Joint
+from parts import Member, Joint, Leg
 
 class Canvas():
     '''
-    Representation of the space in which a scene gets rendered
+    Representation of the space in which objects gets rendered
+
+    @param hideAxes whether to show or hide the global frame axes
     '''
-    def __init__(self):
+
+    def __init__(self, hideAxes=False):
         self.mainAxes = Axes()
-        self.hideAxes = False
+        self.hideAxes = hideAxes
+        self.objects = [
+            # Joint(name='Coxa Joint')
+            Leg(name='leg1')
+            # Joint()
+            ]
     
-    def drawScene(self, xAngle, yAngle, zAngle, zoomVal, jointAngle):
+    def drawScene(self, xAngle, yAngle, zAngle, zoomVal):
         glPushMatrix()
 
         # rotate around the scene
@@ -24,8 +32,8 @@ class Canvas():
         if not self.hideAxes:
             self.mainAxes.draw()
 
-        joint = Joint(angle=jointAngle)
-        joint.draw()
+        for j in self.objects:
+            j.draw()
 
 
         glPopMatrix()

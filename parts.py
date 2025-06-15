@@ -44,7 +44,7 @@ class Leg():
         self.name = name
         self.coxa = JointMemberPair(name='Coxa')
         self.femur = JointMemberPair(name='Femur')
-        self.tibia = JointMemberPair(name='Tiba')
+        self.tibia = JointMemberPair(name='Tibia')
     
     def draw(self):
         glPushMatrix()
@@ -57,11 +57,12 @@ class Leg():
         # # Femur
         self.femur.draw()
         glRotatef(self.femur.getCurrentAngle(), 0, 0, 1)
-        glTranslatef(3.0, 0.0, 0.0)
+        glTranslatef(self.femur.getLength(), 0.0, 0.0)
 
         # # Tibia
-        # glRotatef(self.tibia.getCurrentAngle(), 0, 0, 1)
-        # self.tibia.draw()
+        self.tibia.draw()
+        glRotatef(self.tibia.getCurrentAngle(), 0, 0, 1)
+        glTranslatef(self.tibia.getLength(), 0.0, 0.0)
 
         glPopMatrix()
 
@@ -69,7 +70,7 @@ class Leg():
 class JointMemberPair():
     def __init__(self, startAngle=0.0, name='Joint and Member'):
         # self.joint = Cylinder(base=0.5, top=0.5, length=1)
-        self.joint = Joint()
+        self.joint = Joint(name=name)
         self.leg = Member(length=3.0)
         self.axis = Axes()
         self.angle = startAngle
@@ -77,8 +78,6 @@ class JointMemberPair():
         self.name = name
 
     def draw(self):
-        # self.changed, self.angle = imgui.slider_float(self.name, self.angle, -180.0, 180.0)
-
         glPushMatrix()
         # glRotatef(self.joint.getCurrentAngle(), 0, 0, 1)
         self.joint.draw()

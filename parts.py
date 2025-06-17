@@ -6,14 +6,17 @@ from shapes import Cylinder
 from utils import Axes
 
 class Member():
-    def __init__(self, length=1.0):
+    def __init__(self, name='Member', length=1.0):
         self.cylinder = Cylinder(length=length, base=0.25, top=0.25)
         self.axis = Axes()
-        self.length=length
+        self.length = length
+        self.name = name
 
     def draw(self):
+        self.changed, self.length = imgui.input_float(self.name, self.length, 0.1, 50)
         glPushMatrix()
         glColor3f(0.8, 0.8, 0.8)
+        self.cylinder.setLength(self.length)
         self.cylinder.draw()
         glTranslatef(0, 0, self.length // 2)
         self.axis.draw()
@@ -48,10 +51,10 @@ class Joint():
         
 
 class JointMemberPair():
-    def __init__(self, startAngle=0.0, name='Joint and Member', length=3.0):
+    def __init__(self, startAngle=0.0, name='JointMember', length=3.0):
         # self.joint = Cylinder(base=0.5, top=0.5, length=1)
-        self.joint = Joint(name=name, startAngle=startAngle)
-        self.leg = Member(length=length)
+        self.joint = Joint(name=f'{name} joint', startAngle=startAngle)
+        self.leg = Member(name=f'{name} member', length=length)
         self.axis = Axes()
         self.angle = startAngle
         self.changed = False

@@ -14,6 +14,9 @@ class Cylinder():
         gluCylinder(quadric, self.base, self.top, self.length, self.slices, 1)
         gluDeleteQuadric(quadric)
     
+    def setLength(self, newLength):
+        self.length = newLength
+
     def getLength(self):
         return self.length
 

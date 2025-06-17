@@ -1,3 +1,4 @@
+from tracemalloc import start
 from OpenGL.GLU import * 
 from OpenGL.GL import *
 import imgui
@@ -18,6 +19,7 @@ class Member():
         self.axis.draw()
         glPopMatrix()
 
+
 class Joint():
     def __init__(self, startAngle=0.0, name='Joint'):
         self.body = Cylinder(base=0.5, top=0.5, length=1)
@@ -37,41 +39,19 @@ class Joint():
     
     def getCurrentAngle(self):
         return self.angle
+
+    def getJointRadius(self):
+        return self.body.getBaseRadius()
     
-
-class Leg():
-    def __init__(self, name: str):
-        self.name = name
-        self.coxa = JointMemberPair(name='Coxa')
-        self.femur = JointMemberPair(name='Femur')
-        self.tibia = JointMemberPair(name='Tibia')
-    
-    def draw(self):
-        glPushMatrix()
-
-        # Coxa
-        self.coxa.draw()
-        glRotatef(self.coxa.getCurrentAngle(), 0, 0, 1)
-        glTranslatef(3.0, 0.0, 0.0)  # move along leg length
-
-        # # Femur
-        self.femur.draw()
-        glRotatef(self.femur.getCurrentAngle(), 0, 0, 1)
-        glTranslatef(self.femur.getLength(), 0.0, 0.0)
-
-        # # Tibia
-        self.tibia.draw()
-        glRotatef(self.tibia.getCurrentAngle(), 0, 0, 1)
-        glTranslatef(self.tibia.getLength(), 0.0, 0.0)
-
-        glPopMatrix()
-
+    def getJointHeight(self):
+        return self.body.getLength()
+        
 
 class JointMemberPair():
-    def __init__(self, startAngle=0.0, name='Joint and Member'):
+    def __init__(self, startAngle=0.0, name='Joint and Member', length=3.0):
         # self.joint = Cylinder(base=0.5, top=0.5, length=1)
-        self.joint = Joint(name=name)
-        self.leg = Member(length=3.0)
+        self.joint = Joint(name=name, startAngle=startAngle)
+        self.leg = Member(length=length)
         self.axis = Axes()
         self.angle = startAngle
         self.changed = False
@@ -79,7 +59,6 @@ class JointMemberPair():
 
     def draw(self):
         glPushMatrix()
-        # glRotatef(self.joint.getCurrentAngle(), 0, 0, 1)
         self.joint.draw()
         glRotatef(self.joint.getCurrentAngle(), 0, 0, 1)
         self.angle = self.joint.getCurrentAngle()
@@ -94,5 +73,38 @@ class JointMemberPair():
         return float(self.leg.length)
 
     def getCurrentAngle(self):
-        # print(f'current angle {self.angle}')
         return float(self.angle)
+    
+
+class Leg():
+    def __init__(self, name: str, coxaLength=3.0, femurLength=3.0, tibiaLength=3.0):
+        self.name = name
+        self.coxa = JointMemberPair(name='Coxa', length=coxaLength)
+        self.femur = JointMemberPair(name='Femur', length=femurLength)
+        self.tibia = JointMemberPair(name='Tibia', length=tibiaLength)
+    
+    def draw(self):
+        glPushMatrix()
+
+        # Coxa
+        self.coxa.draw()
+        glRotatef(self.coxa.getCurrentAngle(), 0, 0, 1)
+        glRotatef(90.0, 1, 0, 0)
+        coxaJointRadius = self.coxa.joint.getJointRadius()
+        coxaJointHeight = self.coxa.joint.getJointHeight()
+        coxaLength = self.coxa.getLength()
+        glTranslatef(coxaLength, coxaJointRadius, -coxaJointHeight / 2)  # move along leg length and center the Femur
+
+        # Femur
+        self.femur.draw()
+        glRotatef(self.femur.getCurrentAngle(), 0, 0, 1)
+        glTranslatef(self.femur.getLength(), 0.0, 0.0)
+
+        # Tibia
+        self.tibia.draw()
+        glRotatef(self.tibia.getCurrentAngle(), 0, 0, 1)
+        glTranslatef(self.tibia.getLength(), 0.0, 0.0)
+
+        glPopMatrix()
+
+

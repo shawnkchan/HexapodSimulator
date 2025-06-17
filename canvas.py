@@ -15,7 +15,7 @@ class Canvas():
         self.hideAxes = hideAxes
         self.objects = [
             # Joint(name='Coxa Joint')
-            Leg(name='leg1')
+            Leg(name='leg1', coxaLength=1.5, femurLength=3.0, tibiaLength=5.0)
             # Joint()
             ]
     

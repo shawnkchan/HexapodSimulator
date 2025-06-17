@@ -13,3 +13,12 @@ class Cylinder():
         gluQuadricDrawStyle(quadric, GLU_FILL)
         gluCylinder(quadric, self.base, self.top, self.length, self.slices, 1)
         gluDeleteQuadric(quadric)
+    
+    def getLength(self):
+        return self.length
+
+    def getBaseRadius(self):
+        return self.base
+    
+    def getTopRadius(self):
+        return self.top

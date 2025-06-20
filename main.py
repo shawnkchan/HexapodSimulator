@@ -13,13 +13,13 @@ def main():
     pygame.init()
     display = (1000, 600)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-    glClearColor(1, 1, 1, 1)
+    glClearColor(0.09, 0.09, 0.09, 1)
     gluPerspective(45, display[0] / display[1], 0.1, 50.0)
-    glTranslatef(0.0, 0.0, -5)
+    glTranslatef(0.0, 0.0, -20)
 
     # set the initial camera view
     glRotatef(-45, 1, 0, 0)
-    glRotatef(-45, 0, 0, 1)
+    glRotatef(-135, 0, 0, 1)
     glEnable(GL_DEPTH_TEST)
     clock = pygame.time.Clock()
     running = True

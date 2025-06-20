@@ -15,8 +15,7 @@ class Canvas():
         self.hideAxes = hideAxes
         self.objects = [
             # Joint(name='Coxa Joint')
-            Leg(name='leg1', coxaLength=1.5, femurLength=3.0, tibiaLength=5.0)
-            # Joint()
+            Leg(name='Leg1', coxaLength=1.5, femurLength=3.0, tibiaLength=5.0, xOrigin=1.0, yOrigin=1.0, zOrigin=1.0)
             ]
     
     def drawScene(self, xAngle, yAngle, zAngle, zoomVal):
@@ -26,7 +25,7 @@ class Canvas():
         glRotatef(zAngle, 0, 0, 1)
         glRotatef(xAngle, 1, 0, 0)
         glRotatef(yAngle, 0, 1, 0)
-        glTranslatef(zoomVal, -zoomVal, zoomVal)
+        glTranslatef(zoomVal, zoomVal, zoomVal)
 
         # draw objects here
         if not self.hideAxes:

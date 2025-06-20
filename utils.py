@@ -8,6 +8,7 @@ class Axes():
     '''
     def __init__(self):
         self.unitCylinder = Cylinder()
+        self.cone = Cylinder(base=0.15, top=0.01, length=0.4)
     
     def draw(self):
         glPushMatrix()
@@ -15,15 +16,25 @@ class Axes():
         # z axis, red
         glColor3f(1, 0, 0)
         self.unitCylinder.draw()
+        glTranslatef(0, 0, 1)
+        self.cone.draw()
+        glTranslatef(0, 0, -1)
+
+        # y axis, green
+        glRotatef(-90, 1, 0, 0)
+        glColor3f(0, 1, 0)
+        self.unitCylinder.draw()
+        glTranslatef(0, 0, 1)
+        self.cone.draw()
+        glTranslatef(0, 0, -1)
 
         # x axis, blue
         glRotatef(90, 0, 1, 0)
         glColor3f(0, 0, 1)
         self.unitCylinder.draw()
-    
-        # y axis, green
-        glRotatef(90, 1, 0, 0)
-        glColor3f(0, 1, 0)
-        self.unitCylinder.draw()
+        glTranslatef(0, 0, 1)
+        self.cone.draw()
 
+    
+        
         glPopMatrix()

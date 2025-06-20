@@ -1,4 +1,7 @@
 import math
+import imgui
+from OpenGL.GL import *
+from OpenGL.GLU import *
 
 def coxaAngle(y, x):
     '''
@@ -27,3 +30,29 @@ def tibiaAngle(femurLength, tibiaLength, x, y, z):
     tibiaAngle = math.acos((x**2 + y**2 + z**2 - femurLength**2 - tibiaLength**2) / (2 * tibiaLength * femurLength))
 
     return tibiaAngle
+
+
+class ikSolver():
+    def __init__(self, origin: dict, name: str):
+        self.origin = origin
+        self.name = f'{name} Solver'
+        self.xGoal = None
+        self.yGoal = None
+        self.zGoal = None
+
+    def draw(self):
+        if self.xGoal and self.yGoal and self.zGoal:
+            glPushMatrix()
+            glTranslatef(self.xGoal, self.yGoal, self.zGoal)
+            quadric = gluNewQuadric()
+            gluQuadricDrawStyle(quadric, GLU_FILL)
+            glColor3f(0, 1, 1)
+            gluSphere(quadric, 0.1, 32, 32) 
+            gluDeleteQuadric(quadric)
+            glPopMatrix()
+    
+    def setGoalCoordinates(self, x, y, z):
+        self.xGoal = x
+        self.yGoal = y
+        self.zGoal = z
+    

@@ -40,6 +40,11 @@ def main():
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
+            elif event.type == pygame.MOUSEWHEEL:
+                if event.y > 0:
+                    zoomVal += 0.3
+                else:
+                    zoomVal -= 0.3
             impl.process_event(event)
 
         impl.process_inputs()
@@ -60,6 +65,15 @@ def main():
             zoomVal -= 0.1
         if keys[pygame.K_x]:
             zoomVal += 0.1
+
+        # x, y = pygame.mouse.get_rel()
+        # if pygame.mouse.get_pressed(num_buttons=3)[0]:
+        #     xAngle -= y
+        #     zAngle += x
+        
+        if pygame.mouse.get_pressed(num_buttons=3)[0] and pygame.key.get_pressed()[K_LCTRL]:
+            pass
+            # glTranslatef(0.5 * x, 0, 0.5 * y)
 
         # clean the canvas to refresh the frame
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)

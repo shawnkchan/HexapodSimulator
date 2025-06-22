@@ -1,4 +1,4 @@
-from shapes import Cylinder
+from shapes import Cylinder, Cone
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
@@ -8,7 +8,7 @@ class Axes():
     '''
     def __init__(self):
         self.unitCylinder = Cylinder()
-        self.cone = Cylinder(base=0.15, top=0.01, length=0.4)
+        self.cone = Cone(baseRadius=0.15, tipRadius=0.01, length=0.4)
     
     def draw(self):
         glPushMatrix()

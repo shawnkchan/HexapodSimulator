@@ -31,6 +31,10 @@ def tibiaAngle(femurLength, tibiaLength, x, y, z):
 
     return tibiaAngle
 
+def minimumJointAngle(linkHeight, jointRadius):
+    gamma = math.atan((linkHeight / 2) / (jointRadius))
+    return 2 * gamma
+
 
 class ikSolver():
     def __init__(self, origin: dict, name: str):

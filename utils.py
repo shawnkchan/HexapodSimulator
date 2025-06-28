@@ -34,7 +34,5 @@ class Axes():
         self.unitCylinder.draw()
         glTranslatef(0, 0, 1)
         self.cone.draw()
-
-    
         
         glPopMatrix()

@@ -4,7 +4,7 @@ from OpenGL.GL import *
 import imgui
 from shapes import Cylinder
 from utils import Axes
-from inverseKinematicsSolver import ikSolver
+from kinematicsSolvers import ikSolver
 import math
 
 class Member():

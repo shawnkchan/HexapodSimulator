@@ -2,6 +2,7 @@ import math as m
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
+import imgui
 
 def coxaAngle(y, x):
     '''
@@ -64,17 +65,25 @@ def endEffectorPosition(x: float, y: float, z: float, transformationMatrices: li
     pos = finalTransform @ pos
     return pos
 
-class ikSolver():
-    def __init__(self, origin: dict, name: str):
+class ikSolverLeg():
+    def __init__(self, origin: dict, name: str, coxaLength, femurLength, tibiaLength):
         self.origin = origin
         self.name = f'{name} Solver'
-        self.xGoal = None
-        self.yGoal = None
-        self.zGoal = None
+        self.coxaLength = coxaLength
+        self.femurLength = femurLength
+        self.tibiaLength = tibiaLength
+        self.xGoal = self.coxaLength + self.femurLength + self.tibiaLength
+        self.yGoal = 0.0
+        self.zGoal = 0.0
 
     def draw(self):
         if self.xGoal is not None and self.yGoal is not None and self.zGoal is not None:
+            goalChanged, vals = imgui.input_float3(f'{self.name} Goal Coordinates', self.xGoal, self.yGoal, self.zGoal)
+            self.xGoal = vals[0]
+            self.yGoal = vals[1]
+            self.zGoal = vals[2]
             glPushMatrix()
+            glTranslatef(self.origin['x'], self.origin['y'], self.origin['z']) # translate by offset
             glTranslatef(self.xGoal, self.yGoal, self.zGoal)
             quadric = gluNewQuadric()
             gluQuadricDrawStyle(quadric, GLU_FILL)
@@ -82,6 +91,7 @@ class ikSolver():
             gluSphere(quadric, 0.1, 32, 32) 
             gluDeleteQuadric(quadric)
             glPopMatrix()
+    
     
     def setGoalCoordinates(self, x, y, z):
         self.xGoal = x

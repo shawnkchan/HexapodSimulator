@@ -4,7 +4,7 @@ from OpenGL.GL import *
 import imgui
 from shapes import Cylinder
 from utils import Axes
-from kinematicsSolvers import ikSolver, dhTransformMatrix, endEffectorPosition
+from kinematicsSolvers import dhTransformMatrix, endEffectorPosition, ikSolverLeg
 import math
 
 class Member():
@@ -39,16 +39,19 @@ class Joint():
         self.maxAngle = maxAngle
 
     def draw(self):
-        self.changed, self.angle = imgui.slider_float(self.name, self.angle, self.minAngle, self.maxAngle)
+        self.changed, self.angle = imgui.slider_angle(self.name, self.angle, self.minAngle, self.maxAngle) # imgui.slider_angle returns angles in radians
         glPushMatrix()
-        glRotatef(self.angle, 0, 0, 1)
+        glRotatef(self.getCurrentAngle(), 0, 0, 1)
         self.axis.draw()
         glColor3f(0.5, 0, 0.5)
         self.body.draw()
         glPopMatrix()
     
     def getCurrentAngle(self):
-        return self.angle
+        '''
+        returns the joint's current yaw angle in degrees for easier use with glRotatef
+        '''
+        return math.degrees(self.angle)
 
     def getRadius(self):
         return self.body.getRadius()
@@ -57,7 +60,12 @@ class Joint():
         return self.body.getLength()
     
     def setAngle(self, angle):
-        self.angle = angle
+        if angle < self.minAngle:
+            print('Desired angle is smaller than minimum possible angle.')
+        elif angle > self.maxAngle:
+            print('Desired angle is greater than maximum possible angle')
+        else:
+            self.angle = angle
 
     def setMinimumAngle(self, angle):
         self.minAngle = angle
@@ -109,22 +117,26 @@ class Leg():
         self.femur = JointMemberPair(name='Femur', length=femurLength)
         self.tibia = JointMemberPair(name='Tibia', length=tibiaLength)
         self.origin = {'x': xOrigin, 'y': yOrigin, 'z': zOrigin}
-        self.ikSolver = ikSolver(origin=self.origin, name=self.name)
+        self.ikSolver = ikSolverLeg(
+            origin=self.origin, 
+            name=self.name,
+            coxaLength=self.coxa.getLength(),
+            femurLength=self.femur.getLength(),
+            tibiaLength=self.tibia.getLength()
+            )
+
+        # initialise the DH transformation matrices for a point on the end-effector
         self.transformationMatrices = [
             dhTransformMatrix(math.pi / 2, self.coxa.getLength(), self.coxa.getCurrentAngle(), 0),
             dhTransformMatrix(0, self.femur.getLength(), self.femur.getCurrentAngle(), 0),
             dhTransformMatrix(0, self.tibia.getLength(), self.tibia.getCurrentAngle(), 0)
         ]
-        # self.ikSolver.setGoalCoordinates(self.coxa.getLength() + self.femur.getLength() + self.tibia.getLength(), 0.0, 0.0)
-        self.ikSolver.setGoalCoordinates(5.0, 1.0, 0.0)
 
+        # print(math.degrees(self.ikSolver.coxaAngle()))
+        # print(math.degrees(self.ikSolver.femurAngle(self.femur.getLength(), self.tibia.getLength(), self.coxa.getLength())))
+        # print(math.degrees(self.ikSolver.tibiaAngle(self.femur.getLength(), self.tibia.getLength(), self.coxa.getLength())))
 
-        print(self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal)
-
-        print(math.degrees(self.ikSolver.coxaAngle()))
-        print(math.degrees(self.ikSolver.femurAngle(self.femur.getLength(), self.tibia.getLength(), self.coxa.getLength())))
-        print(math.degrees(self.ikSolver.tibiaAngle(self.femur.getLength(), self.tibia.getLength(), self.coxa.getLength())))
-
+        # set the max and min angles for the femur and for the tibia
         maxFemurAngle = math.degrees((math.pi) - self.minimumLinkAngle(self.coxa, self.femur))
         minFemurAngle = -maxFemurAngle
         self.femur.setMaximumJoinAngle(maxFemurAngle)

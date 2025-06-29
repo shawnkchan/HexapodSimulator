@@ -172,6 +172,8 @@ class Leg():
         glTranslatef(self.origin['x'], self.origin['y'], self.origin['z'])
 
         # Coxa
+        coxaAngle = self.ikSolver.coxaAngle()
+        self.coxa.setJointAngle(coxaAngle)
         self.coxa.draw()
         glRotatef(self.coxa.getCurrentAngle(), 0, 0, 1)
         glRotatef(90.0, 1, 0, 0)

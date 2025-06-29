@@ -31,10 +31,6 @@ def tibiaAngle(femurLength, tibiaLength, x, y, z):
 
     return tibiaAngle
 
-def minimumJointAngle(linkHeight, jointRadius):
-    gamma = m.atan((linkHeight / 2) / (jointRadius))
-    return 2 * gamma
-
 def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
     '''
     returns the homogenous transformation matrix using Denevit-Hartenberg parameters
@@ -61,7 +57,7 @@ def endEffectorPosition(x: float, y: float, z: float, transformationMatrices: li
     @param  z   z-coordinate of the end effector relative to the last body frame
     @param transformationMatrices   list of the transformation matrices to be applied. Must be in sorted order, ie from the fixed frame to the last body frame
     '''
-    pos = [x, y, x, 1]
+    pos = [x, y, z, 1]
     finalTransform = np.identity(4, dtype=float)
     for m in transformationMatrices:
         finalTransform @= m
@@ -77,7 +73,7 @@ class ikSolver():
         self.zGoal = None
 
     def draw(self):
-        if self.xGoal and self.yGoal and self.zGoal:
+        if self.xGoal is not None and self.yGoal is not None and self.zGoal is not None:
             glPushMatrix()
             glTranslatef(self.xGoal, self.yGoal, self.zGoal)
             quadric = gluNewQuadric()
@@ -91,4 +87,43 @@ class ikSolver():
         self.xGoal = x
         self.yGoal = y
         self.zGoal = z
+    
+    def coxaAngle(self):
+        '''
+        Returns the angle of the coxa joint, where positive follows the right hand curl rule wrt the coxa's z-axis
+
+        @param  y    Desired y coordinate for end effector to reach
+        @param  x   Desired x coordinate for end effector to reach
+
+        @return coxaAngle   The angle at which the Coxa's joint should be set
+        '''
+        return m.atan(self.yGoal / self.xGoal)
+
+    def femurAngle(self, femurLength, tibiaLength, coxaLength):
+        '''
+        Returns the angle of the femur joint, where positive follows the right hand curl rule wrt the femur joint
+        '''
+        xCoxa = coxaLength * m.cos(self.coxaAngle())
+        yCoxa = coxaLength * m.sin(self.coxaAngle())
+        p = m.sqrt((self.xGoal - xCoxa)**2 + (self.yGoal - yCoxa)**2)
+
+        alpha = m.atan2(self.zGoal, p)
+        
+        theta2 = m.acos(
+            (tibiaLength**2 - femurLength**2 - p**2 - self.zGoal**2) / (-2*femurLength * m.sqrt(p**2 + self.zGoal**2))
+            )
+
+        femurAngle = theta2 + alpha
+
+        return femurAngle
+
+
+    def tibiaAngle(self, femurLength, tibiaLength, coxaLength):
+        xCoxa = coxaLength * m.cos(self.coxaAngle())
+        yCoxa = coxaLength * m.sin(self.coxaAngle())
+        p = m.sqrt((self.xGoal - xCoxa)**2 + (self.yGoal - yCoxa)**2)
+
+        tibiaAngle = -m.acos((p**2 + self.zGoal**2 - femurLength**2 - tibiaLength**2) / (2 * tibiaLength * femurLength))
+
+        return tibiaAngle   
     

@@ -15,7 +15,7 @@ class Canvas():
         self.hideAxes = hideAxes
         self.objects = [
             # Joint(name='Coxa Joint')
-            Leg(name='Leg1', coxaLength=1.5, femurLength=3.0, tibiaLength=5.0, xOrigin=1.0, yOrigin=1.0, zOrigin=1.0)
+            Leg(name='Leg1', coxaLength=1.5, femurLength=3.0, tibiaLength=5.0, xOrigin=0.0, yOrigin=0.0, zOrigin=0.0)
             ]
     
     def drawScene(self, xAngle, yAngle, zAngle, zoomVal):

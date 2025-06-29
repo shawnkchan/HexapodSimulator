@@ -4,7 +4,7 @@ from OpenGL.GL import *
 import imgui
 from shapes import Cylinder
 from utils import Axes
-from kinematicsSolvers import ikSolver
+from kinematicsSolvers import ikSolver, dhTransformMatrix, endEffectorPosition
 import math
 
 class Member():
@@ -82,7 +82,7 @@ class JointMemberPair():
         self.angle = self.joint.getCurrentAngle()
 
         glColor3f(0.5, 0.5, 0.5)
-        glTranslatef(self.joint.getRadius(), 0.0, self.joint.getJointHeight() / 2)
+        glTranslatef(0.0, 0.0, self.joint.getJointHeight() / 2)
         glRotatef(90.0, 0, 1, 0)
         self.leg.draw()
         glPopMatrix()
@@ -110,13 +110,25 @@ class Leg():
         self.tibia = JointMemberPair(name='Tibia', length=tibiaLength)
         self.origin = {'x': xOrigin, 'y': yOrigin, 'z': zOrigin}
         self.ikSolver = ikSolver(origin=self.origin, name=self.name)
-        self.ikSolver.setGoalCoordinates(2.0, 2.0, 2.0)
+        self.transformationMatrices = [
+            dhTransformMatrix(math.pi / 2, self.coxa.getLength(), self.coxa.getCurrentAngle(), 0),
+            dhTransformMatrix(0, self.femur.getLength(), self.femur.getCurrentAngle(), 0),
+            dhTransformMatrix(0, self.tibia.getLength(), self.tibia.getCurrentAngle(), 0)
+        ]
+        # self.ikSolver.setGoalCoordinates(self.coxa.getLength() + self.femur.getLength() + self.tibia.getLength(), 0.0, 0.0)
+        self.ikSolver.setGoalCoordinates(5.0, 1.0, 0.0)
+
+
+        print(self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal)
+
+        print(math.degrees(self.ikSolver.coxaAngle()))
+        print(math.degrees(self.ikSolver.femurAngle(self.femur.getLength(), self.tibia.getLength(), self.coxa.getLength())))
+        print(math.degrees(self.ikSolver.tibiaAngle(self.femur.getLength(), self.tibia.getLength(), self.coxa.getLength())))
 
         maxFemurAngle = math.degrees((math.pi) - self.minimumLinkAngle(self.coxa, self.femur))
         minFemurAngle = -maxFemurAngle
         self.femur.setMaximumJoinAngle(maxFemurAngle)
         self.femur.setMinimumJointAngle(minFemurAngle)
-        print(maxFemurAngle)
 
         maxTibiaAngle = math.degrees((math.pi) - self.minimumLinkAngle(self.femur, self.tibia))
         minTibiaAngle = -maxTibiaAngle
@@ -154,7 +166,7 @@ class Leg():
         coxaJointRadius = self.coxa.joint.getRadius()
         coxaJointHeight = self.coxa.joint.getJointHeight()
         coxaLength = self.coxa.getLength()
-        femurXPosition = coxaLength + coxaJointRadius * 2
+        femurXPosition = coxaLength
         glTranslatef(femurXPosition, coxaJointRadius, -coxaJointHeight / 2)  # move along leg length and center the Femur
 
         # Femur
@@ -162,7 +174,7 @@ class Leg():
         glRotatef(self.femur.getCurrentAngle(), 0, 0, 1)
         femurLength = self.femur.getLength()
         femurJointRadius = self.femur.joint.getRadius()
-        tibiaXPosition = femurLength + femurJointRadius * 2
+        tibiaXPosition = femurLength
         glTranslatef(tibiaXPosition, 0.0, 0.0)
 
         # Tibia

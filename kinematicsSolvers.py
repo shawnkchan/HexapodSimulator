@@ -92,7 +92,6 @@ class ikSolverLeg():
             gluDeleteQuadric(quadric)
             glPopMatrix()
     
-    
     def setGoalCoordinates(self, x, y, z):
         self.xGoal = x
         self.yGoal = y
@@ -109,31 +108,34 @@ class ikSolverLeg():
         '''
         return m.atan(self.yGoal / self.xGoal)
 
-    def femurAngle(self, femurLength, tibiaLength, coxaLength):
+    def femurAngle(self):
         '''
         Returns the angle of the femur joint, where positive follows the right hand curl rule wrt the femur joint
         '''
-        xCoxa = coxaLength * m.cos(self.coxaAngle())
-        yCoxa = coxaLength * m.sin(self.coxaAngle())
-        p = m.sqrt((self.xGoal - xCoxa)**2 + (self.yGoal - yCoxa)**2)
+        p = self._getRelativeGoalPosition()
 
         alpha = m.atan2(self.zGoal, p)
         
         theta2 = m.acos(
-            (tibiaLength**2 - femurLength**2 - p**2 - self.zGoal**2) / (-2*femurLength * m.sqrt(p**2 + self.zGoal**2))
+            (self.tibiaLength**2 - self.femurLength**2 - p**2 - self.zGoal**2) / (-2*self.femurLength * m.sqrt(p**2 + self.zGoal**2))
             )
 
         femurAngle = theta2 + alpha
-
         return femurAngle
 
+    def tibiaAngle(self):
+        p = self._getRelativeGoalPosition()
 
-    def tibiaAngle(self, femurLength, tibiaLength, coxaLength):
-        xCoxa = coxaLength * m.cos(self.coxaAngle())
-        yCoxa = coxaLength * m.sin(self.coxaAngle())
-        p = m.sqrt((self.xGoal - xCoxa)**2 + (self.yGoal - yCoxa)**2)
-
-        tibiaAngle = -m.acos((p**2 + self.zGoal**2 - femurLength**2 - tibiaLength**2) / (2 * tibiaLength * femurLength))
+        tibiaAngle = -m.acos((p**2 + self.zGoal**2 - self.femurLength**2 - self.tibiaLength**2) / (2 * self.tibiaLength * self.femurLength))
 
         return tibiaAngle   
+    
+    def _getRelativeGoalPosition(self):
+        '''
+        Helper function to get the goal coordinate's position relative to the Coxa joint 
+        '''
+        xCoxa = self.coxaLength * m.cos(self.coxaAngle())
+        yCoxa = self.coxaLength * m.sin(self.coxaAngle())
+        p = m.sqrt((self.xGoal - xCoxa)**2 + (self.yGoal - yCoxa)**2)
+        return p
     

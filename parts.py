@@ -39,7 +39,7 @@ class Joint():
         self.maxAngle = maxAngle
 
     def draw(self):
-        self.changed, self.angle = imgui.slider_angle(self.name, self.angle, self.minAngle, self.maxAngle) # imgui.slider_angle returns angles in radians
+        # self.changed, self.angle = imgui.slider_angle(self.name, self.angle, self.minAngle, self.maxAngle) # imgui.slider_angle returns angles in radians
         glPushMatrix()
         glRotatef(self.getCurrentAngle(), 0, 0, 1)
         self.axis.draw()
@@ -75,6 +75,7 @@ class Joint():
         
 
 class JointMemberPair():
+    # TODO: be nice if we can just inherit from Joint and Member classes
     def __init__(self, startAngle=0.0, name='JointMember', length=3.0):
         self.joint = Joint(name=f'{name} Joint', startAngle=startAngle)
         self.leg = Member(name=f'{name} Member', length=length)
@@ -110,8 +111,16 @@ class JointMemberPair():
     def setMaximumJoinAngle(self, angle):
         self.joint.setMaximumAngle(angle)
 
+    def getMinimumJointAngle(self):
+        return self.joint.minAngle
+    
+    def getMaximumJointAngle(self):
+        return self.joint.maxAngle
+
 class Leg():
     def __init__(self, name: str, coxaLength=3.0, femurLength=3.0, tibiaLength=3.0, xOrigin=0, yOrigin=0, zOrigin=0):
+
+
         self.name = name
         self.coxa = JointMemberPair(name='Coxa', length=coxaLength)
         self.femur = JointMemberPair(name='Femur', length=femurLength)
@@ -164,6 +173,8 @@ class Leg():
 
     
     def draw(self):
+        self.drawForwardKinematicsControlPanel()
+
         glPushMatrix()
         # Draw IK's goal point if any
         self.ikSolver.draw()
@@ -173,6 +184,7 @@ class Leg():
 
         # Coxa
         coxaAngle = self.ikSolver.coxaAngle()
+        print('Coxa ', coxaAngle)
         self.coxa.setJointAngle(coxaAngle)
         self.coxa.draw()
         glRotatef(self.coxa.getCurrentAngle(), 0, 0, 1)
@@ -184,6 +196,9 @@ class Leg():
         glTranslatef(femurXPosition, coxaJointRadius, -coxaJointHeight / 2)  # move along leg length and center the Femur
 
         # Femur
+        femurAngle = self.ikSolver.femurAngle()
+        print('Femur ', femurAngle)
+        self.femur.setJointAngle(femurAngle)
         self.femur.draw()
         glRotatef(self.femur.getCurrentAngle(), 0, 0, 1)
         femurLength = self.femur.getLength()
@@ -192,11 +207,32 @@ class Leg():
         glTranslatef(tibiaXPosition, 0.0, 0.0)
 
         # Tibia
+        tibiaAngle = self.ikSolver.tibiaAngle()
+        print('Tibia', tibiaAngle)
+        self.tibia.setJointAngle(tibiaAngle)
         self.tibia.draw()
         glRotatef(self.tibia.getCurrentAngle(), 0, 0, 1)
         glTranslatef(self.tibia.getLength(), 0.0, 0.0)
 
         glPopMatrix()
+
+    def drawForwardKinematicsControlPanel(self):
+        imgui.set_next_window_size(400, 200)
+        imgui.begin("Forward Kinematics Control Panel")
+
+        # Coxa controls
+        _, coxaAngle = imgui.slider_angle(self.coxa.name, math.radians(self.coxa.getCurrentAngle()), self.coxa.getMinimumJointAngle(), self.coxa.getMaximumJointAngle())
+        self.coxa.setJointAngle(coxaAngle)
+
+        # Femur controls
+        _, femurAngle = imgui.slider_angle(self.femur.name, math.radians(self.femur.getCurrentAngle()), self.femur.getMinimumJointAngle(), self.femur.getMaximumJointAngle())
+        self.femur.setJointAngle(femurAngle)
+
+        # Tibia controls
+        _, tibiaAngle = imgui.slider_angle(self.tibia.name, math.radians(self.tibia.getCurrentAngle()), self.tibia.getMinimumJointAngle(), self.tibia.getMaximumJointAngle())
+        self.tibia.setJointAngle(tibiaAngle)
+
+        imgui.end()
 
     def setCoxaAngle(self, angle):
         self.coxa.setJointAngle(angle)

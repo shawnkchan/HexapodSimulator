@@ -49,8 +49,8 @@ def main():
 
         impl.process_inputs()
         imgui.new_frame()
-        imgui.set_next_window_size(300, 200)
-        imgui.begin("Control Panel")
+        # imgui.set_next_window_size(400, 200)
+        # imgui.begin("Forward Kinematics Control Panel")
 
         keys = pygame.key.get_pressed()
         if keys[K_LEFT]:
@@ -79,7 +79,7 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         canvas.drawScene(xAngle, yAngle, zAngle, zoomVal) 
 
-        imgui.end()
+        # imgui.end()
         imgui.render()
         impl.render(imgui.get_draw_data())
 

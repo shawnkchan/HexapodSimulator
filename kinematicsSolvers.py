@@ -116,8 +116,13 @@ class ikSolverLeg():
 
         alpha = m.atan2(self.zGoal, p)
         
+        # print((self.tibiaLength**2 - self.femurLength**2 - p**2 - self.zGoal**2))
+        # print(-2*self.femurLength * m.sqrt(p**2 + self.zGoal**2))
+
+        temp = max(min((self.tibiaLength**2 - self.femurLength**2 - p**2 - self.zGoal**2) / (-2*self.femurLength * m.sqrt(p**2 + self.zGoal**2)), 1), -1)
+
         theta2 = m.acos(
-            (self.tibiaLength**2 - self.femurLength**2 - p**2 - self.zGoal**2) / (-2*self.femurLength * m.sqrt(p**2 + self.zGoal**2))
+            temp
             )
 
         femurAngle = theta2 + alpha
@@ -126,7 +131,9 @@ class ikSolverLeg():
     def tibiaAngle(self):
         p = self._getRelativeGoalPosition()
 
-        tibiaAngle = -m.acos((p**2 + self.zGoal**2 - self.femurLength**2 - self.tibiaLength**2) / (2 * self.tibiaLength * self.femurLength))
+        temp = max(min((p**2 + self.zGoal**2 - self.femurLength**2 - self.tibiaLength**2) / (2 * self.tibiaLength * self.femurLength), 1), -1)
+
+        tibiaAngle = -m.acos(temp)
 
         return tibiaAngle   
     

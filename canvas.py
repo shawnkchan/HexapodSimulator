@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from utils import Axes
 from parts import Member, Joint, Leg
+import imgui
 
 class Canvas():
     '''
@@ -17,6 +18,8 @@ class Canvas():
             # Joint(name='Coxa Joint')
             Leg(name='Leg1', coxaLength=1.5, femurLength=3.0, tibiaLength=5.0, xOrigin=0.0, yOrigin=0.0, zOrigin=0.0)
             ]
+        self.enableInverseKinematics = True
+        
     
     def drawScene(self, xAngle, yAngle, zAngle, zoomVal):
         glPushMatrix()
@@ -27,12 +30,19 @@ class Canvas():
         glRotatef(yAngle, 0, 1, 0)
         glTranslatef(zoomVal, zoomVal, zoomVal)
 
+        self.isInverseKinematicsEnabled()
+
         # draw objects here
         if not self.hideAxes:
             self.mainAxes.draw()
 
         for j in self.objects:
-            j.draw()
-
+            j.draw(isInverseKinematicsEnabled=self.enableInverseKinematics)
 
         glPopMatrix()
+
+    def isInverseKinematicsEnabled(self):
+        imgui.set_next_window_size(200, 100)
+        imgui.begin('Toggle Inverse Kinematics')
+        _, self.enableInverseKinematics = imgui.checkbox('Enable Inverse Kinematics', self.enableInverseKinematics)
+        imgui.end()

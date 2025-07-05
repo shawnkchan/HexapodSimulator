@@ -78,10 +78,10 @@ class ikSolverLeg():
 
     def draw(self):
         if self.xGoal is not None and self.yGoal is not None and self.zGoal is not None:
-            goalChanged, vals = imgui.input_float3(f'{self.name} Goal Coordinates', self.xGoal, self.yGoal, self.zGoal)
-            self.xGoal = vals[0]
-            self.yGoal = vals[1]
-            self.zGoal = vals[2]
+            # goalChanged, vals = imgui.input_float3(f'{self.name} Goal Coordinates', self.xGoal, self.yGoal, self.zGoal)
+            # self.xGoal = vals[0]
+            # self.yGoal = vals[1]
+            # self.zGoal = vals[2]
             glPushMatrix()
             glTranslatef(self.origin['x'], self.origin['y'], self.origin['z']) # translate by offset
             glTranslatef(self.xGoal, self.yGoal, self.zGoal)

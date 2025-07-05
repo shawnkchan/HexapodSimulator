@@ -172,8 +172,11 @@ class Leg():
         return g1 + g2
 
     
-    def draw(self):
-        self.drawForwardKinematicsControlPanel()
+    def draw(self, isInverseKinematicsEnabled):
+        if isInverseKinematicsEnabled:
+            self.drawInverseKinematicsControlPanel()
+        else:
+            self.drawForwardKinematicsControlPanel()
 
         glPushMatrix()
         # Draw IK's goal point if any
@@ -184,7 +187,7 @@ class Leg():
 
         # Coxa
         coxaAngle = self.ikSolver.coxaAngle()
-        print('Coxa ', coxaAngle)
+        # print('Coxa ', coxaAngle)
         self.coxa.setJointAngle(coxaAngle)
         self.coxa.draw()
         glRotatef(self.coxa.getCurrentAngle(), 0, 0, 1)
@@ -197,7 +200,7 @@ class Leg():
 
         # Femur
         femurAngle = self.ikSolver.femurAngle()
-        print('Femur ', femurAngle)
+        # print('Femur ', femurAngle)
         self.femur.setJointAngle(femurAngle)
         self.femur.draw()
         glRotatef(self.femur.getCurrentAngle(), 0, 0, 1)
@@ -208,7 +211,7 @@ class Leg():
 
         # Tibia
         tibiaAngle = self.ikSolver.tibiaAngle()
-        print('Tibia', tibiaAngle)
+        # print('Tibia', tibiaAngle)
         self.tibia.setJointAngle(tibiaAngle)
         self.tibia.draw()
         glRotatef(self.tibia.getCurrentAngle(), 0, 0, 1)
@@ -233,6 +236,17 @@ class Leg():
         self.tibia.setJointAngle(tibiaAngle)
 
         imgui.end()
+    
+    def drawInverseKinematicsControlPanel(self):
+        imgui.set_next_window_size(400, 200)
+        imgui.begin("Inverse Kinematics Control Panel")
+        goalChanged, vals = imgui.input_float3(f'{self.name} Goal Coordinates', self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal)
+
+        
+
+        imgui.end()
+
+
 
     def setCoxaAngle(self, angle):
         self.coxa.setJointAngle(angle)

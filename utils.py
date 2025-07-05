@@ -1,6 +1,8 @@
+from gc import enable
 from shapes import Cylinder, Cone
 from OpenGL.GL import *
 from OpenGL.GLU import *
+import imgui
 
 class Axes():
     '''
@@ -34,5 +36,6 @@ class Axes():
         self.unitCylinder.draw()
         glTranslatef(0, 0, 1)
         self.cone.draw()
-        
+
         glPopMatrix()
+

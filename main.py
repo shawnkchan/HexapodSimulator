@@ -1,4 +1,5 @@
 from datetime import timedelta
+from gc import enable
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
@@ -11,7 +12,7 @@ from imgui.integrations.pygame import PygameRenderer
 def main():
     # Initialize pygame
     pygame.init()
-    display = (1000, 600)
+    display = (1800, 1000)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     glClearColor(0.09, 0.09, 0.09, 1)
     gluPerspective(45, display[0] / display[1], 0.1, 50.0)
@@ -49,8 +50,6 @@ def main():
 
         impl.process_inputs()
         imgui.new_frame()
-        # imgui.set_next_window_size(400, 200)
-        # imgui.begin("Forward Kinematics Control Panel")
 
         keys = pygame.key.get_pressed()
         if keys[K_LEFT]:
@@ -79,7 +78,6 @@ def main():
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         canvas.drawScene(xAngle, yAngle, zAngle, zoomVal) 
 
-        # imgui.end()
         imgui.render()
         impl.render(imgui.get_draw_data())
 

@@ -141,8 +141,6 @@ class JointMemberPair():
 
 class Leg():
     def __init__(self, name: str, coxaLength=3.0, femurLength=3.0, tibiaLength=3.0, xOrigin=0, yOrigin=0, zOrigin=0):
-
-
         self.name = name
         self.coxa = JointMemberPair(name='Coxa', length=coxaLength)
         self.femur = JointMemberPair(name='Femur', length=femurLength)
@@ -162,10 +160,6 @@ class Leg():
             dhTransformMatrix(0, self.femur.length, self.femur.getCurrentAngle(), 0),
             dhTransformMatrix(0, self.tibia.length, self.tibia.getCurrentAngle(), 0)
         ]
-
-        # print(math.degrees(self.ikSolver.coxaAngle()))
-        # print(math.degrees(self.ikSolver.femurAngle(self.femur.length, self.tibia.length, self.coxa.length)))
-        # print(math.degrees(self.ikSolver.tibiaAngle(self.femur.length, self.tibia.length, self.coxa.length)))
 
         # set the max and min angles for the femur and for the tibia
         maxFemurAngle = math.degrees((math.pi) - self.minimumLinkAngle(self.coxa, self.femur))
@@ -209,9 +203,6 @@ class Leg():
         glTranslatef(self.origin['x'], self.origin['y'], self.origin['z'])
 
         # Coxa
-        coxaAngle = self.ikSolver.coxaAngle()
-        # print('Coxa ', coxaAngle)
-        self.coxa.setJointAngle(coxaAngle)
         self.coxa.draw()
         glRotatef(self.coxa.getCurrentAngle(), 0, 0, 1)
         glRotatef(90.0, 1, 0, 0)
@@ -222,9 +213,6 @@ class Leg():
         glTranslatef(femurXPosition, coxaJointRadius, -coxaJointHeight / 2)  # move along leg length and center the Femur
 
         # Femur
-        femurAngle = self.ikSolver.femurAngle()
-        # print('Femur ', femurAngle)
-        self.femur.setJointAngle(femurAngle)
         self.femur.draw()
         glRotatef(self.femur.getCurrentAngle(), 0, 0, 1)
         femurLength = self.femur.length
@@ -233,9 +221,6 @@ class Leg():
         glTranslatef(tibiaXPosition, 0.0, 0.0)
 
         # Tibia
-        tibiaAngle = self.ikSolver.tibiaAngle()
-        # print('Tibia', tibiaAngle)
-        self.tibia.setJointAngle(tibiaAngle)
         self.tibia.draw()
         glRotatef(self.tibia.getCurrentAngle(), 0, 0, 1)
         glTranslatef(self.tibia.length, 0.0, 0.0)
@@ -265,19 +250,20 @@ class Leg():
         imgui.begin("Inverse Kinematics Controls")
         goalChanged, values = imgui.input_float3(f'{self.name} Goal Coordinates', self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal)
         self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal = values[0], values[1], values[2]
+
+        self.coxa.setJointAngle(self.ikSolver.coxaAngle())
+        self.femur.setJointAngle(self.ikSolver.femurAngle())
+        self.tibia.setJointAngle(self.ikSolver.tibiaAngle())
+
         imgui.end()
 
     def drawLinkLengthControlPanel(self):
         imgui.set_next_window_size(400, 200)
         imgui.begin("Link Length Controls")
         coxaChanged, self.coxa.length = imgui.input_float(self.coxa.name, self.coxa.length, 0.1, 50)
-
         femurChanged, self.femur.length = imgui.input_float(self.femur.name, self.femur.length, 0.1, 50)
-
         tibiaChanged, self.tibia.length = imgui.input_float(self.tibia.name, self.tibia.length, 0.1, 50)
-
         imgui.end()
-        
         
 
     def setCoxaAngle(self, angle):

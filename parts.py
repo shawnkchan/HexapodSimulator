@@ -11,11 +11,11 @@ class Member():
     def __init__(self, name='Member', length=1.0):
         self.cylinder = Cylinder(length=length, radius=0.25)
         self.axis = Axes()
-        self.length = length
-        self.name = name
+        self._length = length
+        self._name = name
 
     def draw(self):
-        self.changed, self.length = imgui.input_float(self.name, self.length, 0.1, 50)
+        # self.changed, self.length = imgui.input_float(self.name, self.length, 0.1, 50)
         glPushMatrix()
         glColor3f(0.8, 0.8, 0.8)
         self.cylinder.setLength(self.length)
@@ -23,6 +23,18 @@ class Member():
         glTranslatef(0, 0, self.length / 2)
         self.axis.draw()
         glPopMatrix()
+
+    @property
+    def name(self):
+        return self._name
+    
+    @property
+    def length(self):
+        return self._length
+    
+    @length.setter
+    def length(self, value):
+        self._length = value
     
     def getRadius(self):
         return self.cylinder.getRadius()
@@ -57,7 +69,7 @@ class Joint():
         return self.body.getRadius()
     
     def getJointHeight(self):
-        return self.body.getLength()
+        return self.body.length
     
     def setAngle(self, angle):
         if angle < self.minAngle:
@@ -82,7 +94,7 @@ class JointMemberPair():
         self.axis = Axes()
         self.angle = startAngle
         self.changed = False
-        self.name = name
+        self._name = name
 
     def draw(self):
         glPushMatrix()
@@ -96,8 +108,18 @@ class JointMemberPair():
         self.leg.draw()
         glPopMatrix()
     
-    def getLength(self):
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def length(self):
         return float(self.leg.length)
+    
+    @length.setter
+    def length(self, value):
+        self.leg.length = value
+    
 
     def getCurrentAngle(self):
         return float(self.angle)
@@ -129,21 +151,21 @@ class Leg():
         self.ikSolver = ikSolverLeg(
             origin=self.origin, 
             name=self.name,
-            coxaLength=self.coxa.getLength(),
-            femurLength=self.femur.getLength(),
-            tibiaLength=self.tibia.getLength()
+            coxaLength=self.coxa.length,
+            femurLength=self.femur.length,
+            tibiaLength=self.tibia.length
             )
 
         # initialise the DH transformation matrices for a point on the end-effector
         self.transformationMatrices = [
-            dhTransformMatrix(math.pi / 2, self.coxa.getLength(), self.coxa.getCurrentAngle(), 0),
-            dhTransformMatrix(0, self.femur.getLength(), self.femur.getCurrentAngle(), 0),
-            dhTransformMatrix(0, self.tibia.getLength(), self.tibia.getCurrentAngle(), 0)
+            dhTransformMatrix(math.pi / 2, self.coxa.length, self.coxa.getCurrentAngle(), 0),
+            dhTransformMatrix(0, self.femur.length, self.femur.getCurrentAngle(), 0),
+            dhTransformMatrix(0, self.tibia.length, self.tibia.getCurrentAngle(), 0)
         ]
 
         # print(math.degrees(self.ikSolver.coxaAngle()))
-        # print(math.degrees(self.ikSolver.femurAngle(self.femur.getLength(), self.tibia.getLength(), self.coxa.getLength())))
-        # print(math.degrees(self.ikSolver.tibiaAngle(self.femur.getLength(), self.tibia.getLength(), self.coxa.getLength())))
+        # print(math.degrees(self.ikSolver.femurAngle(self.femur.length, self.tibia.length, self.coxa.length)))
+        # print(math.degrees(self.ikSolver.tibiaAngle(self.femur.length, self.tibia.length, self.coxa.length)))
 
         # set the max and min angles for the femur and for the tibia
         maxFemurAngle = math.degrees((math.pi) - self.minimumLinkAngle(self.coxa, self.femur))
@@ -177,6 +199,7 @@ class Leg():
             self.drawInverseKinematicsControlPanel()
         else:
             self.drawForwardKinematicsControlPanel()
+        self.drawLinkLengthControlPanel()
 
         glPushMatrix()
         # Draw IK's goal point if any
@@ -194,7 +217,7 @@ class Leg():
         glRotatef(90.0, 1, 0, 0)
         coxaJointRadius = self.coxa.joint.getRadius()
         coxaJointHeight = self.coxa.joint.getJointHeight()
-        coxaLength = self.coxa.getLength()
+        coxaLength = self.coxa.length
         femurXPosition = coxaLength
         glTranslatef(femurXPosition, coxaJointRadius, -coxaJointHeight / 2)  # move along leg length and center the Femur
 
@@ -204,7 +227,7 @@ class Leg():
         self.femur.setJointAngle(femurAngle)
         self.femur.draw()
         glRotatef(self.femur.getCurrentAngle(), 0, 0, 1)
-        femurLength = self.femur.getLength()
+        femurLength = self.femur.length
         femurJointRadius = self.femur.joint.getRadius()
         tibiaXPosition = femurLength
         glTranslatef(tibiaXPosition, 0.0, 0.0)
@@ -215,13 +238,13 @@ class Leg():
         self.tibia.setJointAngle(tibiaAngle)
         self.tibia.draw()
         glRotatef(self.tibia.getCurrentAngle(), 0, 0, 1)
-        glTranslatef(self.tibia.getLength(), 0.0, 0.0)
+        glTranslatef(self.tibia.length, 0.0, 0.0)
 
         glPopMatrix()
 
     def drawForwardKinematicsControlPanel(self):
         imgui.set_next_window_size(400, 200)
-        imgui.begin("Forward Kinematics Control Panel")
+        imgui.begin("Forward Kinematics Controls")
 
         # Coxa controls
         _, coxaAngle = imgui.slider_angle(self.coxa.name, math.radians(self.coxa.getCurrentAngle()), self.coxa.getMinimumJointAngle(), self.coxa.getMaximumJointAngle())
@@ -239,14 +262,23 @@ class Leg():
     
     def drawInverseKinematicsControlPanel(self):
         imgui.set_next_window_size(400, 200)
-        imgui.begin("Inverse Kinematics Control Panel")
-        goalChanged, vals = imgui.input_float3(f'{self.name} Goal Coordinates', self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal)
-
-        
-
+        imgui.begin("Inverse Kinematics Controls")
+        goalChanged, values = imgui.input_float3(f'{self.name} Goal Coordinates', self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal)
+        self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal = values[0], values[1], values[2]
         imgui.end()
 
+    def drawLinkLengthControlPanel(self):
+        imgui.set_next_window_size(400, 200)
+        imgui.begin("Link Length Controls")
+        coxaChanged, self.coxa.length = imgui.input_float(self.coxa.name, self.coxa.length, 0.1, 50)
 
+        femurChanged, self.femur.length = imgui.input_float(self.femur.name, self.femur.length, 0.1, 50)
+
+        tibiaChanged, self.tibia.length = imgui.input_float(self.tibia.name, self.tibia.length, 0.1, 50)
+
+        imgui.end()
+        
+        
 
     def setCoxaAngle(self, angle):
         self.coxa.setJointAngle(angle)

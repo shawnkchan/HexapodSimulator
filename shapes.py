@@ -3,24 +3,40 @@ from OpenGL.GLU import *
 
 class Cylinder():
     def __init__(self, radius=0.1, length=1.0, slices=32):
-        self.radius = radius
-        self.length = length
+        self._radius = radius
+        self._length = length
         self.slices = slices
 
     def draw(self):
         quadric = gluNewQuadric()
         gluQuadricDrawStyle(quadric, GLU_FILL)
-        gluCylinder(quadric, self.radius, self.radius, self.length, self.slices, 1)
+        gluCylinder(quadric, self._radius, self._radius, self._length, self.slices, 1)
         gluDeleteQuadric(quadric)
     
-    def setLength(self, newLength):
-        self.length = newLength
+    @property
+    def length(self):
+        return self._length
 
-    def getLength(self):
-        return self.length
+    @length.setter
+    def length(self, value):
+        self._length = value
 
-    def getRadius(self):
-        return self.radius
+    @property
+    def radius(self):
+        return self._radius
+    
+    @radius.setter
+    def radius(self, value):
+        self._radius = value
+
+    # def setLength(self, newLength):
+    #     self.length = newLength
+
+    # def getLength(self):
+    #     return self.length
+
+    # def getRadius(self):
+    #     return self.radius
 
 class Cone(Cylinder):
     def __init__(self, baseRadius=0.1, tipRadius=0.01, length=1.0, slices=32):

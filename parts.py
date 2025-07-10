@@ -290,12 +290,3 @@ class Leg():
         tibiaChanged, self.tibia.length = imgui.input_float(self.tibia.name, self.tibia.length, 0.1, 50)
         imgui.end()
         
-
-    def setCoxaAngle(self, angle):
-        self.coxa.angle = angle
-    
-    def setFemurAngle(self, angle):
-        self.femur.angle = angle
-
-    def setTibiaAngle(self, angle):
-        self.tibia.angle = angle

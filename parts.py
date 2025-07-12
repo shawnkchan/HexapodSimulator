@@ -56,10 +56,11 @@ class Joint():
         self._maxAngle = maxAngle
 
     def draw(self):
-        # self.changed, self.angle = imgui.slider_angle(self.name, self.angle, self.minAngle, self.maxAngle) # imgui.slider_angle returns angles in radians
+        # imgui.slider_angle returns angles in radians
         glPushMatrix()
         glRotatef(self.angle, 0, 0, 1)
         self.axis.draw()
+        glTranslatef(0, 0, -self.body.length / 2)
         glColor3f(0.5, 0, 0.5)
         self.body.draw()
         glPopMatrix()
@@ -117,7 +118,6 @@ class JointMemberPair():
         self._angle = self.joint.angle
 
         glColor3f(0.5, 0.5, 0.5)
-        glTranslatef(0.0, 0.0, self.joint.height / 2)
         glRotatef(90.0, 0, 1, 0)
         self.leg.draw()
         glPopMatrix()
@@ -132,6 +132,7 @@ class JointMemberPair():
     
     @length.setter
     def length(self, value):
+        # TODO: add joint width to the length in the future?
         self.leg.length = value
 
     @property
@@ -174,9 +175,9 @@ class Leg():
         self.ikSolver = ikSolverLeg(
             origin=self.origin, 
             name=self.name,
-            coxaLength=self.coxa.length,
-            femurLength=self.femur.length,
-            tibiaLength=self.tibia.length
+            coxa=self.coxa,
+            femur=self.femur,
+            tibia=self.tibia
             )
 
         # initialise the DH transformation matrices for a point on the end-effector
@@ -196,7 +197,6 @@ class Leg():
         minTibiaAngle = -maxTibiaAngle
         self.tibia.maxAngle = maxTibiaAngle
         self.tibia.minAngle = minTibiaAngle
-
     
     def minimumLinkAngle(self, link1: JointMemberPair, link2: JointMemberPair):
         '''
@@ -235,7 +235,7 @@ class Leg():
         coxaJointHeight = self.coxa.joint.height
         coxaLength = self.coxa.length
         femurXPosition = coxaLength
-        glTranslatef(femurXPosition, coxaJointRadius, -coxaJointHeight / 2)  # move along leg length and center the Femur
+        glTranslatef(femurXPosition, 0.0, 0.0)  # move along leg length and center the Femur
 
         # Femur
         self.femur.draw()

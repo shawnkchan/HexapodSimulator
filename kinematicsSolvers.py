@@ -4,37 +4,12 @@ from OpenGL.GLU import *
 import numpy as np
 import imgui
 
-def coxaAngle(y, x):
-    '''
-    Returns the angle of the coxa joint, where positive follows the right hand curl rule wrt the coxa's z-axis
-
-    @param  y    Desired y coordinate for end effector to reach
-    @param  x   Desired x coordinate for end effector to reach
-
-    @return coxaAngle   The angle at which the Coxa's joint should be set
-    '''
-    return m.atan(y / x)
-
-def femurAngle(femurLength, tibiaLength, x, y, z):
-    '''
-    Returns the angle of the femur joint, where positive follows the right hand curl rule wrt the femur joint
-    '''
-    femurAngle = m.acos(
-        (tibiaLength**2 - femurLength**2 - x**2 - y**2 - z**2) / (-2*tibiaLength * m.sqrt(x**2 + y**2 + z**2))
-        ) + m.atan(
-            z / m.sqrt(x **2 + y**2)
-            )
-
-    return femurAngle
-
-def tibiaAngle(femurLength, tibiaLength, x, y, z):
-    tibiaAngle = m.acos((x**2 + y**2 + z**2 - femurLength**2 - tibiaLength**2) / (2 * tibiaLength * femurLength))
-
-    return tibiaAngle
 
 def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
     '''
-    returns the homogenous transformation matrix using Denevit-Hartenberg parameters
+    NOTE: Uses Modified DH, not standard DH
+    Returns the homogenous transformation matrix using Denevit-Hartenberg parameters. Used to solve for forward kinematics of kinematic chains.
+    Angles are in radians.
 
     @param  alpha   link twist
     @param  a   link length
@@ -49,39 +24,54 @@ def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
     ]
     return  matrix
 
+# def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
+#     return np.array([
+#         [m.cos(theta), -m.sin(theta)*m.cos(alpha),  m.sin(theta)*m.sin(alpha), a*m.cos(theta)],
+#         [m.sin(theta),  m.cos(theta)*m.cos(alpha), -m.cos(theta)*m.sin(alpha), a*m.sin(theta)],
+#         [0, m.sin(alpha), m.cos(alpha), d],
+#         [0, 0, 0, 1]
+#     ])
+    
+
+
 def endEffectorPosition(x: float, y: float, z: float, transformationMatrices: list[list[list]]):
     '''
-    solves for the end effector position of the hexapod leg given a list of ordered transformation matrices
+    Solves for the coordinates of the hexapod leg's tip relative to the base link frame given a list of ordered transformation matrices.
+    Each transformation matrix corresponds to a DH transform matrix for a specific configuration of the leg
 
-    @param  x   x-coordinate of the end effector relative to the last body frame
-    @param  y   y-coordinate of the end effector relative to the last body frame
-    @param  z   z-coordinate of the end effector relative to the last body frame
-    @param transformationMatrices   list of the transformation matrices to be applied. Must be in sorted order, ie from the fixed frame to the last body frame
+    @param  x   x-coordinate of the end effector tip relative to the last body frame
+    @param  y   y-coordinate of the end effector tip relative to the last body frame
+    @param  z   z-coordinate of the end effector tip relative to the last body frame
+    @param transformationMatrices   list of the transformation matrices to be applied. Must be in sorted order, ie from the fixed frame to the end effector frame.
+
+    @return pos 4 x 1 matrix representing the x, y, z coordinates of the input coordinates relative to the base link frame
     '''
     pos = [x, y, z, 1]
     finalTransform = np.identity(4, dtype=float)
     for m in transformationMatrices:
+        # print(f'final transform: {finalTransform}')
+        # print(f'matrix: {m}')
         finalTransform @= m
     pos = finalTransform @ pos
     return pos
 
 class ikSolverLeg():
-    def __init__(self, origin: dict, name: str, coxaLength, femurLength, tibiaLength):
+    def __init__(self, origin: dict, name: str, coxa, femur, tibia):
         self.origin = origin
         self.name = f'{name} Solver'
-        self.coxaLength = coxaLength
-        self.femurLength = femurLength
-        self.tibiaLength = tibiaLength
-        self.xGoal = self.coxaLength + self.femurLength + self.tibiaLength
+        self.coxa = coxa
+        self.femur = femur
+        self.tibia = tibia
+        # center the point about the end effector's tip
+        self.xGoal = self.coxa.length + self.femur.length + self.tibia.length
         self.yGoal = 0.0
         self.zGoal = 0.0
 
     def draw(self):
+        '''
+        Draws the solver's goal point
+        '''
         if self.xGoal is not None and self.yGoal is not None and self.zGoal is not None:
-            # goalChanged, vals = imgui.input_float3(f'{self.name} Goal Coordinates', self.xGoal, self.yGoal, self.zGoal)
-            # self.xGoal = vals[0]
-            # self.yGoal = vals[1]
-            # self.zGoal = vals[2]
             glPushMatrix()
             glTranslatef(self.origin['x'], self.origin['y'], self.origin['z']) # translate by offset
             glTranslatef(self.xGoal, self.yGoal, self.zGoal)
@@ -119,7 +109,7 @@ class ikSolverLeg():
         # print((self.tibiaLength**2 - self.femurLength**2 - p**2 - self.zGoal**2))
         # print(-2*self.femurLength * m.sqrt(p**2 + self.zGoal**2))
 
-        temp = max(min((self.tibiaLength**2 - self.femurLength**2 - p**2 - self.zGoal**2) / (-2*self.femurLength * m.sqrt(p**2 + self.zGoal**2)), 1), -1)
+        temp = max(min((self.tibia.length**2 - self.femur.length**2 - p**2 - self.zGoal**2) / (-2*self.femur.length * m.sqrt(p**2 + self.zGoal**2)), 1), -1)
 
         theta2 = m.acos(
             temp
@@ -131,7 +121,7 @@ class ikSolverLeg():
     def tibiaAngle(self):
         p = self._getRelativeGoalPosition()
 
-        temp = max(min((p**2 + self.zGoal**2 - self.femurLength**2 - self.tibiaLength**2) / (2 * self.tibiaLength * self.femurLength), 1), -1)
+        temp = max(min((p**2 + self.zGoal**2 - self.femur.length**2 - self.tibia.length**2) / (2 * self.tibia.length * self.femur.length), 1), -1)
 
         tibiaAngle = -m.acos(temp)
 
@@ -141,8 +131,8 @@ class ikSolverLeg():
         '''
         Helper function to get the goal coordinate's position relative to the Coxa joint 
         '''
-        xCoxa = self.coxaLength * m.cos(self.coxaAngle())
-        yCoxa = self.coxaLength * m.sin(self.coxaAngle())
+        xCoxa = self.coxa.length * m.cos(self.coxaAngle())
+        yCoxa = self.coxa.length * m.sin(self.coxaAngle())
         p = m.sqrt((self.xGoal - xCoxa)**2 + (self.yGoal - yCoxa)**2)
         return p
     

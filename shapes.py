@@ -29,14 +29,6 @@ class Cylinder():
     def radius(self, value):
         self._radius = value
 
-    # def setLength(self, newLength):
-    #     self.length = newLength
-
-    # def getLength(self):
-    #     return self.length
-
-    # def getRadius(self):
-    #     return self.radius
 
 class Cone(Cylinder):
     def __init__(self, baseRadius=0.1, tipRadius=0.01, length=1.0, slices=32):

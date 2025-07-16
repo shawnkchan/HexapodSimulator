@@ -7,7 +7,9 @@ import imgui
 
 def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
     '''
-    returns the homogenous transformation matrix using Denevit-Hartenberg parameters
+    NOTE: Uses Modified DH, not standard DH
+    Returns the homogenous transformation matrix using Denevit-Hartenberg parameters. Used to solve for forward kinematics of kinematic chains.
+    Angles are in radians.
 
     @param  alpha   link twist
     @param  a   link length
@@ -22,18 +24,33 @@ def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
     ]
     return  matrix
 
+# def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
+#     return np.array([
+#         [m.cos(theta), -m.sin(theta)*m.cos(alpha),  m.sin(theta)*m.sin(alpha), a*m.cos(theta)],
+#         [m.sin(theta),  m.cos(theta)*m.cos(alpha), -m.cos(theta)*m.sin(alpha), a*m.sin(theta)],
+#         [0, m.sin(alpha), m.cos(alpha), d],
+#         [0, 0, 0, 1]
+#     ])
+    
+
+
 def endEffectorPosition(x: float, y: float, z: float, transformationMatrices: list[list[list]]):
     '''
-    solves for the end effector position of the hexapod leg given a list of ordered transformation matrices
+    Solves for the coordinates of the hexapod leg's tip relative to the base link frame given a list of ordered transformation matrices.
+    Each transformation matrix corresponds to a DH transform matrix for a specific configuration of the leg
 
-    @param  x   x-coordinate of the end effector relative to the last body frame
-    @param  y   y-coordinate of the end effector relative to the last body frame
-    @param  z   z-coordinate of the end effector relative to the last body frame
-    @param transformationMatrices   list of the transformation matrices to be applied. Must be in sorted order, ie from the fixed frame to the end effector frame
+    @param  x   x-coordinate of the end effector tip relative to the last body frame
+    @param  y   y-coordinate of the end effector tip relative to the last body frame
+    @param  z   z-coordinate of the end effector tip relative to the last body frame
+    @param transformationMatrices   list of the transformation matrices to be applied. Must be in sorted order, ie from the fixed frame to the end effector frame.
+
+    @return pos 4 x 1 matrix representing the x, y, z coordinates of the input coordinates relative to the base link frame
     '''
     pos = [x, y, z, 1]
     finalTransform = np.identity(4, dtype=float)
     for m in transformationMatrices:
+        # print(f'final transform: {finalTransform}')
+        # print(f'matrix: {m}')
         finalTransform @= m
     pos = finalTransform @ pos
     return pos

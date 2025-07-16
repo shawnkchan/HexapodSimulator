@@ -20,6 +20,7 @@ class Canvas():
             ]
         self.enableInverseKinematics = True
         self.displayReachablePoints = False
+        self.updateReachablePointsClicked = False
         
     
     def drawScene(self, xAngle, yAngle, zAngle, zoomVal):
@@ -39,7 +40,10 @@ class Canvas():
             self.mainAxes.draw()
 
         for j in self.objects:
-            j.draw(isInverseKinematicsEnabled=self.enableInverseKinematics, isDisplayReachablePoints=self.displayReachablePoints)
+            j.draw(
+                isInverseKinematicsEnabled=self.enableInverseKinematics,
+                isDisplayReachablePoints=self.displayReachablePoints,
+                updateReachablePointsClicked=self.updateReachablePointsClicked)
 
         glPopMatrix()
 
@@ -53,4 +57,5 @@ class Canvas():
         imgui.set_next_window_size(200, 100)
         imgui.begin('Show Reachable Points')
         _, self.displayReachablePoints = imgui.checkbox('Display Reachable Points', self.displayReachablePoints)
+        self.updateReachablePointsClicked = imgui.button('Update Reachable points')
         imgui.end()

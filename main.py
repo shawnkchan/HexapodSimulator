@@ -1,5 +1,3 @@
-from datetime import timedelta
-from gc import enable
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *

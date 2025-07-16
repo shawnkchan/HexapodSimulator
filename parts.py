@@ -153,6 +153,9 @@ class JointMemberPair():
     
     @property
     def minAngle(self):
+        '''
+        Minimum joint angle in radians
+        '''
         return self.joint.minAngle
     
     @minAngle.setter
@@ -161,6 +164,9 @@ class JointMemberPair():
 
     @property
     def maxAngle(self):
+        '''
+        Maximum joint angle in radians
+        '''
         return self.joint.maxAngle
     
     @maxAngle.setter
@@ -208,9 +214,11 @@ class Leg():
         g2 = math.atan((h2 / 2) / r2)
 
         return g1 + g2
-
     
-    def draw(self, isInverseKinematicsEnabled, isDisplayReachablePoints):
+    def draw(self, isInverseKinematicsEnabled, isDisplayReachablePoints, updateReachablePointsClicked):
+        if updateReachablePointsClicked:
+            self.reachablePositions = self.computeReachablePoints()
+
         if isDisplayReachablePoints:
             self.drawReachablePoints()
         if isInverseKinematicsEnabled:
@@ -290,9 +298,11 @@ class Leg():
         imgui.end()
 
     def computeReachablePoints(self):
+        '''
+        Draws all the end effector's reachable points
+        '''
         reachablePositions = []
         finalMatrix = dhTransformMatrix(0, self.tibia.length, 0, 0) # coordinate frame at the end effector
-
         for i in np.arange(math.radians(-90), math.radians(90), 0.17):
             coxaTransformMatrix = dhTransformMatrix(0, 0, i, 0)
             for j in np.arange(math.radians(-90), math.radians(90), 0.17):

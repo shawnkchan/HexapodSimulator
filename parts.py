@@ -1,9 +1,10 @@
+from gc import enable
 from tracemalloc import start
 from OpenGL.GLU import * 
 from OpenGL.GL import *
 import imgui
 from shapes import Cylinder
-from utils import Axes
+from utils import Axes, TogglePanel
 from kinematicsSolvers import dhTransformMatrix, endEffectorPosition, ikSolverLeg
 import math
 import numpy as np
@@ -215,18 +216,15 @@ class Leg():
 
         return g1 + g2
     
-    def draw(self, isInverseKinematicsEnabled, isDisplayReachablePoints, updateReachablePointsClicked):
-        if updateReachablePointsClicked:
+    def draw(self, togglePanel: TogglePanel):
+        if togglePanel.updateReachablePointsClicked:
             self.reachablePositions = self.computeReachablePoints()
 
         # Draw all relevant control panels for Leg parameters
-        if isDisplayReachablePoints:
+        if togglePanel.displayReachablePoints:
             self.drawReachablePoints()
-        if isInverseKinematicsEnabled:
-            self.drawInverseKinematicsControlPanel()
-        else:
-            self.drawForwardKinematicsControlPanel()
-        self.drawLinkLengthControlPanel()
+
+        self.drawControlPanel(enableInverseKinematics=togglePanel.enableInverseKinematics)
 
         glPushMatrix()
         # Draw IK's goal point if any
@@ -259,11 +257,20 @@ class Leg():
         glTranslatef(self.tibia.length, 0.0, 0.0)
 
         glPopMatrix()
-
-    def drawForwardKinematicsControlPanel(self):
+    
+    def drawControlPanel(self, enableInverseKinematics):
         imgui.set_next_window_size(400, 200)
-        imgui.begin("Forward Kinematics Controls")
+        imgui.begin(f"{self.name} Control Panel")
 
+        if enableInverseKinematics:
+            self._inverseKinematicsControlPanel()
+        else:
+            self._forwardKinematicsControlPanel()
+        
+        self._linkLengthControlPanel()
+        imgui.end()
+
+    def _forwardKinematicsControlPanel(self):
         # Coxa controls
         _, coxaAngle = imgui.slider_angle(self.coxa.name, math.radians(self.coxa.angle), self.coxa.minAngle, self.coxa.maxAngle)
         self.coxa.angle = coxaAngle
@@ -276,11 +283,9 @@ class Leg():
         _, tibiaAngle = imgui.slider_angle(self.tibia.name, math.radians(self.tibia.angle), self.tibia.minAngle, self.tibia.maxAngle)
         self.tibia.angle = tibiaAngle
 
-        imgui.end()
+        
     
-    def drawInverseKinematicsControlPanel(self):
-        imgui.set_next_window_size(400, 200)
-        imgui.begin("Inverse Kinematics Controls")
+    def _inverseKinematicsControlPanel(self):
         goalChanged, values = imgui.input_float3(f'{self.name} Goal Coordinates', self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal)
         self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal = values[0], values[1], values[2]
 
@@ -288,15 +293,11 @@ class Leg():
         self.femur.angle = self.ikSolver.femurAngle()
         self.tibia.angle = self.ikSolver.tibiaAngle()
 
-        imgui.end()
 
-    def drawLinkLengthControlPanel(self):
-        imgui.set_next_window_size(400, 200)
-        imgui.begin("Link Length Controls")
+    def _linkLengthControlPanel(self):
         coxaChanged, self.coxa.length = imgui.input_float(self.coxa.name, self.coxa.length, 0.1, 50)
         femurChanged, self.femur.length = imgui.input_float(self.femur.name, self.femur.length, 0.1, 50)
         tibiaChanged, self.tibia.length = imgui.input_float(self.tibia.name, self.tibia.length, 0.1, 50)
-        imgui.end()
 
     def computeReachablePoints(self):
         '''

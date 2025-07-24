@@ -19,8 +19,6 @@ class Canvas():
             Leg(name='Leg1', coxaLength=1.5, femurLength=3.0, tibiaLength=5.0, xOrigin=0.0, yOrigin=0.0, zOrigin=0.0)
             ]
         self.togglePanel = TogglePanel()
-        
-        
     
     def drawScene(self, xAngle, yAngle, zAngle, zoomVal):
         glPushMatrix()
@@ -39,10 +37,7 @@ class Canvas():
 
         # Draw all objects
         for obj in self.objects:
-            obj.draw(
-                isInverseKinematicsEnabled=self.togglePanel.enableInverseKinematics,
-                isDisplayReachablePoints=self.togglePanel.displayReachablePoints,
-                updateReachablePointsClicked=self.togglePanel.updateReachablePointsClicked)
+            obj.draw(togglePanel=self.togglePanel)
 
         glPopMatrix()
 

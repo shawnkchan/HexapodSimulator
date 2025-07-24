@@ -61,8 +61,14 @@ class TogglePanel():
         return self._updateReachablePointsClicked
     
     def draw(self):
-        self.drawInverseKinematicsToggle()
-        self.drawDisplayReachablePointsToggle()
+        # self.drawInverseKinematicsToggle()
+        # self.drawDisplayReachablePointsToggle()
+        imgui.set_next_window_size(200, 100)
+        imgui.begin('Toggle Panel')
+        _, self._enableInverseKinematics = imgui.checkbox('Enable Inverse Kinematics', self.enableInverseKinematics)
+        _, self._displayReachablePoints = imgui.checkbox('Display Reachable Points', self.displayReachablePoints)
+        self._updateReachablePointsClicked = imgui.button('Update Reachable points')
+        imgui.end()
     
     def drawInverseKinematicsToggle(self):
         imgui.set_next_window_size(200, 100)

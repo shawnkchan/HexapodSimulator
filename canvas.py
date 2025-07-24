@@ -1,6 +1,6 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from utils import Axes
+from utils import Axes, TogglePanel
 from parts import Member, Joint, Leg
 import imgui
 
@@ -18,9 +18,8 @@ class Canvas():
             # Joint(name='Coxa Joint')
             Leg(name='Leg1', coxaLength=1.5, femurLength=3.0, tibiaLength=5.0, xOrigin=0.0, yOrigin=0.0, zOrigin=0.0)
             ]
-        self.enableInverseKinematics = True
-        self.displayReachablePoints = False
-        self.updateReachablePointsClicked = False
+        self.togglePanel = TogglePanel()
+        
         
     
     def drawScene(self, xAngle, yAngle, zAngle, zoomVal):
@@ -32,30 +31,19 @@ class Canvas():
         glRotatef(yAngle, 0, 1, 0)
         glTranslatef(zoomVal, zoomVal, zoomVal)
 
-        self.isInverseKinematicsEnabled()
-        self.isDisplayReachablePoints()
-
-        # draw objects here
         if not self.hideAxes:
             self.mainAxes.draw()
 
-        for j in self.objects:
-            j.draw(
-                isInverseKinematicsEnabled=self.enableInverseKinematics,
-                isDisplayReachablePoints=self.displayReachablePoints,
-                updateReachablePointsClicked=self.updateReachablePointsClicked)
+        # Draw toggle panel
+        self.togglePanel.draw()
+
+        # Draw all objects
+        for obj in self.objects:
+            obj.draw(
+                isInverseKinematicsEnabled=self.togglePanel.enableInverseKinematics,
+                isDisplayReachablePoints=self.togglePanel.displayReachablePoints,
+                updateReachablePointsClicked=self.togglePanel.updateReachablePointsClicked)
 
         glPopMatrix()
 
-    def isInverseKinematicsEnabled(self):
-        imgui.set_next_window_size(200, 100)
-        imgui.begin('Toggle Inverse Kinematics')
-        _, self.enableInverseKinematics = imgui.checkbox('Enable Inverse Kinematics', self.enableInverseKinematics)
-        imgui.end()
     
-    def isDisplayReachablePoints(self):
-        imgui.set_next_window_size(200, 100)
-        imgui.begin('Show Reachable Points')
-        _, self.displayReachablePoints = imgui.checkbox('Display Reachable Points', self.displayReachablePoints)
-        self.updateReachablePointsClicked = imgui.button('Update Reachable points')
-        imgui.end()

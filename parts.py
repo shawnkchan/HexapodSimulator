@@ -219,6 +219,7 @@ class Leg():
         if updateReachablePointsClicked:
             self.reachablePositions = self.computeReachablePoints()
 
+        # Draw all relevant control panels for Leg parameters
         if isDisplayReachablePoints:
             self.drawReachablePoints()
         if isInverseKinematicsEnabled:

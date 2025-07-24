@@ -39,3 +39,40 @@ class Axes():
 
         glPopMatrix()
 
+class TogglePanel():
+    '''
+    Class to toggle between different view modes of hexapod legs
+    '''
+    def __init__(self):
+        self._enableInverseKinematics = True
+        self._displayReachablePoints = False
+        self._updateReachablePointsClicked = False
+    
+    @property
+    def enableInverseKinematics(self):
+        return self._enableInverseKinematics
+
+    @property
+    def displayReachablePoints(self):
+        return self._displayReachablePoints
+
+    @property
+    def updateReachablePointsClicked(self):
+        return self._updateReachablePointsClicked
+    
+    def draw(self):
+        self.drawInverseKinematicsToggle()
+        self.drawDisplayReachablePointsToggle()
+    
+    def drawInverseKinematicsToggle(self):
+        imgui.set_next_window_size(200, 100)
+        imgui.begin('Toggle Inverse Kinematics')
+        _, self._enableInverseKinematics = imgui.checkbox('Enable Inverse Kinematics', self.enableInverseKinematics)
+        imgui.end()
+    
+    def drawDisplayReachablePointsToggle(self):
+        imgui.set_next_window_size(200, 100)
+        imgui.begin('Show Reachable Points')
+        _, self._displayReachablePoints = imgui.checkbox('Display Reachable Points', self.displayReachablePoints)
+        self._updateReachablePointsClicked = imgui.button('Update Reachable points')
+        imgui.end()

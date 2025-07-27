@@ -77,6 +77,7 @@ def main():
         canvas.drawScene(xAngle, yAngle, zAngle, zoomVal) 
 
         imgui.render()
+        imgui.end_frame()
         impl.render(imgui.get_draw_data())
 
         pygame.display.flip()

@@ -24,15 +24,6 @@ def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
     ]
     return  matrix
 
-# def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
-#     return np.array([
-#         [m.cos(theta), -m.sin(theta)*m.cos(alpha),  m.sin(theta)*m.sin(alpha), a*m.cos(theta)],
-#         [m.sin(theta),  m.cos(theta)*m.cos(alpha), -m.cos(theta)*m.sin(alpha), a*m.sin(theta)],
-#         [0, m.sin(alpha), m.cos(alpha), d],
-#         [0, 0, 0, 1]
-#     ])
-    
-
 
 def endEffectorPosition(x: float, y: float, z: float, transformationMatrices: list[list[list]]):
     '''
@@ -136,3 +127,5 @@ class ikSolverLeg():
         p = m.sqrt((self.xGoal - xCoxa)**2 + (self.yGoal - yCoxa)**2)
         return p
     
+    def legTrajectory(self):
+        pass

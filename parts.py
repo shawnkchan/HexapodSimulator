@@ -266,6 +266,7 @@ class Leg():
             self._inverseKinematicsControlPanel()
         else:
             self._forwardKinematicsControlPanel()
+            print('slider')
         
         self._linkLengthControlPanel()
         imgui.end()
@@ -283,8 +284,6 @@ class Leg():
         _, tibiaAngle = imgui.slider_angle(self.tibia.name, math.radians(self.tibia.angle), self.tibia.minAngle, self.tibia.maxAngle)
         self.tibia.angle = tibiaAngle
 
-        
-    
     def _inverseKinematicsControlPanel(self):
         goalChanged, values = imgui.input_float3(f'{self.name} Goal Coordinates', self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal)
         self.ikSolver.xGoal, self.ikSolver.yGoal, self.ikSolver.zGoal = values[0], values[1], values[2]
@@ -293,11 +292,10 @@ class Leg():
         self.femur.angle = self.ikSolver.femurAngle()
         self.tibia.angle = self.ikSolver.tibiaAngle()
 
-
     def _linkLengthControlPanel(self):
-        coxaChanged, self.coxa.length = imgui.input_float(self.coxa.name, self.coxa.length, 0.1, 50)
-        femurChanged, self.femur.length = imgui.input_float(self.femur.name, self.femur.length, 0.1, 50)
-        tibiaChanged, self.tibia.length = imgui.input_float(self.tibia.name, self.tibia.length, 0.1, 50)
+        coxaChanged, self.coxa.length = imgui.input_float(f'{self.coxa.name} length', self.coxa.length, 0.1, 50)
+        femurChanged, self.femur.length = imgui.input_float(f'{self.femur.name} length', self.femur.length, 0.1, 50)
+        tibiaChanged, self.tibia.length = imgui.input_float(f'{self.tibia.name} length', self.tibia.length, 0.1, 50)
 
     def computeReachablePoints(self):
         '''

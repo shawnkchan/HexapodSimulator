@@ -1,4 +1,5 @@
 import math as m
+from re import X
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
@@ -63,15 +64,16 @@ class ikSolverLeg():
         Draws the solver's goal point
         '''
         if self.xGoal is not None and self.yGoal is not None and self.zGoal is not None:
-            glPushMatrix()
-            glTranslatef(self.origin['x'], self.origin['y'], self.origin['z']) # translate by offset
-            glTranslatef(self.xGoal, self.yGoal, self.zGoal)
-            quadric = gluNewQuadric()
-            gluQuadricDrawStyle(quadric, GLU_FILL)
-            glColor3f(0, 1, 1)
-            gluSphere(quadric, 0.1, 32, 32) 
-            gluDeleteQuadric(quadric)
-            glPopMatrix()
+            # glPushMatrix()
+            # glTranslatef(self.origin['x'], self.origin['y'], self.origin['z']) # translate by offset
+            # glTranslatef(self.xGoal, self.yGoal, self.zGoal)
+            # quadric = gluNewQuadric()
+            # gluQuadricDrawStyle(quadric, GLU_FILL)
+            # glColor3f(0, 1, 1)
+            # gluSphere(quadric, 0.1, 32, 32) 
+            # gluDeleteQuadric(quadric)
+            self.drawTrajectoryPoints()
+            # glPopMatrix()
     
     def setGoalCoordinates(self, x, y, z):
         self.xGoal = x
@@ -127,5 +129,26 @@ class ikSolverLeg():
         p = m.sqrt((self.xGoal - xCoxa)**2 + (self.yGoal - yCoxa)**2)
         return p
     
-    def legTrajectory(self):
-        pass
+    def createLegTrajectory(self, xStart, yStart, zStart):
+        '''
+        Creates a list of points in space for leg motion
+        '''
+        Y_DISPLACEMENT = -4.0
+        Z_DISPLACEMENT = 2.0
+
+        start = (xStart, yStart, zStart)
+        end = (xStart, yStart + Y_DISPLACEMENT, 0)
+
+        peak = (xStart, yStart + Y_DISPLACEMENT / 2, Z_DISPLACEMENT)
+
+        return [start, peak, end]
+
+    def drawTrajectoryPoints(self):
+        glColor3f(0, 1, 1)
+        glPointSize(9.0)
+        glBegin(GL_POINTS)
+        for p in self.createLegTrajectory(5.0, 0.0, -2.0):
+            glVertex3f(p[0], p[1], p[2])
+        glEnd()
+
+

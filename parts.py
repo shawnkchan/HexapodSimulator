@@ -224,6 +224,11 @@ class Leg():
         if togglePanel.displayReachablePoints:
             self.drawReachablePoints()
 
+        if togglePanel.isInStandingMode:
+            self.standState()
+        else:
+            self.flattenState()
+
         self.drawControlPanel(enableInverseKinematics=togglePanel.enableInverseKinematics)
 
         glPushMatrix()
@@ -266,7 +271,6 @@ class Leg():
             self._inverseKinematicsControlPanel()
         else:
             self._forwardKinematicsControlPanel()
-            print('slider')
         
         self._linkLengthControlPanel()
         imgui.end()
@@ -329,3 +333,19 @@ class Leg():
             glVertex3f(p[0], p[1], p[2])
         glEnd()
         
+    def standState(self):
+        '''
+        Moves leg into standing orientation
+        '''
+        X_STANDING = 5.0
+        Y_STANDING = 0.0
+        Z_STANDING = -2.0
+
+        self.ikSolver.setGoalCoordinates(X_STANDING, Y_STANDING, Z_STANDING)
+    
+    def flattenState(self):
+        '''
+        Moves leg into flatened orientation
+        '''
+        totalLength = self.coxa.length + self.femur.length + self.tibia.length
+        self.ikSolver.setGoalCoordinates(totalLength, 0.0, 0.0)

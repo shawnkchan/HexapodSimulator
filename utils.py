@@ -47,7 +47,8 @@ class TogglePanel():
         self._enableInverseKinematics = True
         self._displayReachablePoints = False
         self._updateReachablePointsClicked = False
-    
+        self._standingMode = False
+
     @property
     def enableInverseKinematics(self):
         return self._enableInverseKinematics
@@ -60,26 +61,20 @@ class TogglePanel():
     def updateReachablePointsClicked(self):
         return self._updateReachablePointsClicked
     
+    @property
+    def isInStandingMode(self):
+        return self._standingMode
+    
     def draw(self):
-        imgui.set_next_window_size(200, 100)
+        imgui.set_next_window_size(400, 150)
         imgui.begin('Toggle Panel')
-        _, self._enableInverseKinematics = imgui.checkbox('Enable Inverse Kinematics', self.enableInverseKinematics)
-        _, self._displayReachablePoints = imgui.checkbox('Display Reachable Points', self.displayReachablePoints)
+        _, self._enableInverseKinematics = imgui.checkbox('Enable Inverse Kinematics', self._enableInverseKinematics)
+        _, self._displayReachablePoints = imgui.checkbox('Display Reachable Points', self._displayReachablePoints)
         self._updateReachablePointsClicked = imgui.button('Update Reachable points')
+        _, self._standingMode = imgui.checkbox('Change to standing mode', self._standingMode)
+
         imgui.end()
-    
-    def drawInverseKinematicsToggle(self):
-        imgui.set_next_window_size(200, 100)
-        imgui.begin('Toggle Inverse Kinematics')
-        _, self._enableInverseKinematics = imgui.checkbox('Enable Inverse Kinematics', self.enableInverseKinematics)
-        imgui.end()
-    
-    def drawDisplayReachablePointsToggle(self):
-        imgui.set_next_window_size(200, 100)
-        imgui.begin('Show Reachable Points')
-        _, self._displayReachablePoints = imgui.checkbox('Display Reachable Points', self.displayReachablePoints)
-        self._updateReachablePointsClicked = imgui.button('Update Reachable points')
-        imgui.end()
+
 
 
 # class LegPath():

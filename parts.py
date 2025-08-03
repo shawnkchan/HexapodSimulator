@@ -349,3 +349,6 @@ class Leg():
         '''
         totalLength = self.coxa.length + self.femur.length + self.tibia.length
         self.ikSolver.setGoalCoordinates(totalLength, 0.0, 0.0)
+
+    def walkAnimation(self):
+        pass

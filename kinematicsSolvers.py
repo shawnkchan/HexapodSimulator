@@ -137,27 +137,27 @@ class ikSolverLeg():
         - A straight stance phase (foot on ground)
         - A smooth spline-based swing phase (foot in air)
         '''
-        Y_DISPLACEMENT = 4.0
+        Y_DISPLACEMENT = 2.0
         Z_LIFT = 2.0
         xFixed = xStart
 
-        # Time parameter split: [0.0 → 0.5] for stance, [0.5 → 1.0] for swing
-        t_stance = np.linspace(0.0, 0.5, 50)
-        t_swing = np.linspace(0.5, 1.0, 50)
+        t_stance_1 = np.linspace(0.0, 0.25, 50)
+        t_swing = np.linspace(0.25, 0.75, 50)
+        t_stance_2 = np.linspace(0.75, 1.0, 50)
 
-        # --- STANCE PHASE (straight line) ---
-        y_stance = np.linspace(yStart, yStart + Y_DISPLACEMENT, 50)
+        # --- STANCE PHASE 1(straight line) ---
+        y_stance = np.linspace(yStart, yStart - Y_DISPLACEMENT, 50)
         z_stance = np.full_like(y_stance, zStart)
 
         # --- SWING PHASE (spline with time parameter t ∈ [0.5, 1.0]) ---
-        t_points = np.array([0.5, 0.625, 0.75, 0.875, 1.0])  # within swing phase
+        t_points = np.linspace(0.25, 0.75, 5)  # within swing phase
 
         y_points = np.array([
-            yStart + Y_DISPLACEMENT,                     # end of stance
-            yStart + Y_DISPLACEMENT * 0.75,              # descending
-            yStart + Y_DISPLACEMENT * 0.5,               # peak
-            yStart + Y_DISPLACEMENT * 0.25,              # ascending
-            yStart                                       # end of swing
+            yStart - Y_DISPLACEMENT,                     # end of stance
+            yStart - Y_DISPLACEMENT * 0.5,              # descending
+            yStart, # peak
+            yStart + Y_DISPLACEMENT * 0.5,              # ascending
+            yStart + Y_DISPLACEMENT # end of swing
         ])
 
         z_points = np.array([
@@ -174,14 +174,21 @@ class ikSolverLeg():
         y_swing = y_spline(t_swing)
         z_swing = z_spline(t_swing)
 
-        # --- Combine both phases ---
+        # --- STANCE PHASE 2 (straight line) ---
+        y_stance2 = np.linspace(yStart + Y_DISPLACEMENT, yStart, 50)
+        z_stance2 = np.full_like(y_stance2, zStart)
+
+        # --- Combine all phases ---
         pts = []
 
-        for i in range(len(t_stance)):
+        for i in range(len(t_stance_1)):
             pts.append([xFixed, y_stance[i], z_stance[i]])
 
         for i in range(len(t_swing)):
             pts.append([xFixed, y_swing[i], z_swing[i]])
+
+        for i in range(len(t_stance_2)):
+            pts.append([xFixed, y_stance2[i], z_stance2[i]])
 
         return pts
 

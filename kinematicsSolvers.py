@@ -4,6 +4,8 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
 import imgui
+import scipy
+import scipy.interpolate
 
 
 def dhTransformMatrix(alpha: float, a: float, theta: float, d: float):
@@ -131,23 +133,65 @@ class ikSolverLeg():
     
     def createLegTrajectory(self, xStart, yStart, zStart):
         '''
-        Creates a list of points in space for leg motion
+        Creates a C2-continuous trajectory composed of:
+        - A straight stance phase (foot on ground)
+        - A smooth spline-based swing phase (foot in air)
         '''
-        Y_DISPLACEMENT = -4.0
-        Z_DISPLACEMENT = 2.0
+        Y_DISPLACEMENT = 4.0
+        Z_LIFT = 2.0
+        xFixed = xStart
 
-        start = (xStart, yStart, zStart)
-        end = (xStart, yStart + Y_DISPLACEMENT, 0)
+        # Time parameter split: [0.0 → 0.5] for stance, [0.5 → 1.0] for swing
+        t_stance = np.linspace(0.0, 0.5, 50)
+        t_swing = np.linspace(0.5, 1.0, 50)
 
-        peak = (xStart, yStart + Y_DISPLACEMENT / 2, Z_DISPLACEMENT)
+        # --- STANCE PHASE (straight line) ---
+        y_stance = np.linspace(yStart, yStart + Y_DISPLACEMENT, 50)
+        z_stance = np.full_like(y_stance, zStart)
 
-        return [start, peak, end]
+        # --- SWING PHASE (spline with time parameter t ∈ [0.5, 1.0]) ---
+        t_points = np.array([0.5, 0.625, 0.75, 0.875, 1.0])  # within swing phase
+
+        y_points = np.array([
+            yStart + Y_DISPLACEMENT,                     # end of stance
+            yStart + Y_DISPLACEMENT * 0.75,              # descending
+            yStart + Y_DISPLACEMENT * 0.5,               # peak
+            yStart + Y_DISPLACEMENT * 0.25,              # ascending
+            yStart                                       # end of swing
+        ])
+
+        z_points = np.array([
+            zStart,               # ground
+            zStart + Z_LIFT * 0.8,
+            zStart + Z_LIFT,      # peak
+            zStart + Z_LIFT * 0.8,
+            zStart                # back to ground
+        ])
+
+        y_spline = scipy.interpolate.CubicSpline(t_points, y_points, bc_type='clamped')
+        z_spline = scipy.interpolate.CubicSpline(t_points, z_points, bc_type='clamped')
+
+        y_swing = y_spline(t_swing)
+        z_swing = z_spline(t_swing)
+
+        # --- Combine both phases ---
+        pts = []
+
+        for i in range(len(t_stance)):
+            pts.append([xFixed, y_stance[i], z_stance[i]])
+
+        for i in range(len(t_swing)):
+            pts.append([xFixed, y_swing[i], z_swing[i]])
+
+        return pts
+
+
 
     def drawTrajectoryPoints(self):
         glColor3f(0, 1, 1)
-        glPointSize(9.0)
+        glPointSize(3.0)
         glBegin(GL_POINTS)
-        for p in self.createLegTrajectory(5.0, 0.0, -2.0):
+        for p in self.createLegTrajectory(self.xGoal, self.yGoal, self.zGoal):
             glVertex3f(p[0], p[1], p[2])
         glEnd()
 
